@@ -4,8 +4,26 @@
 <meta charset="utf-8"> <!-- Use UTF-8 so emoji and symbols display properly -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> <!-- Makes the page fit phone screens and stops pinch-zoom -->
 <meta name="theme-color" content="#01030c"> <!-- Colours the phone browser bar to match the night sky -->
-<title>Diwali Dhamaka</title> <!-- Text shown in the browser tab -->
-<meta name="description" content="Celebrate Diwali digitally under a starry village sky."> <!-- Short description for search engines -->
+<title>Digital Diwali – Play Virtual Firecrackers Online | Pollution-Free Diwali</title> <!-- Text shown in the browser tab and as the blue link in Google -->
+<meta name="description" content="Light virtual crackers with a sparkler under a starry sky. Free, no download. See how crackers change the AQI and noise, and enjoy a pollution-free Diwali with kids and pets."> <!-- The grey text under the link in Google -->
+<meta name="robots" content="index, follow, max-image-preview:large"> <!-- Tells search engines they may list this page -->
+<link rel="canonical" href="https://dhruvb-cloud.github.io/Digital-Diwali/"> <!-- The one official address of this page (change it when you move to your own domain) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%94%3C/text%3E%3C/svg%3E"> <!-- Small lamp icon shown in the browser tab -->
+<meta property="og:type" content="website"> <!-- Open Graph: how the link looks when shared on WhatsApp, Facebook, LinkedIn... -->
+<meta property="og:site_name" content="Digital Diwali"> <!-- Site name on the share card -->
+<meta property="og:title" content="Digital Diwali – Burst Crackers Without the Smoke 🪔"> <!-- Title on the share card -->
+<meta property="og:description" content="Light virtual crackers with a sparkler and watch the AQI and noise change. A pollution-free Diwali for kids, pets and parents."> <!-- Text on the share card -->
+<meta property="og:url" content="https://dhruvb-cloud.github.io/Digital-Diwali/"> <!-- Address the card points to -->
+<meta property="og:image" content="https://dhruvb-cloud.github.io/Digital-Diwali/og-image.png"> <!-- Preview picture on the share card (1200x630) -->
+<meta property="og:image:width" content="1200"> <!-- Picture width -->
+<meta property="og:image:height" content="630"> <!-- Picture height -->
+<meta name="twitter:card" content="summary_large_image"> <!-- Twitter/X: show a big picture card -->
+<meta name="twitter:title" content="Digital Diwali – Burst Crackers Without the Smoke 🪔"> <!-- Title on the X card -->
+<meta name="twitter:description" content="Light virtual crackers and watch the AQI and noise change. A pollution-free Diwali!"> <!-- Text on the X card -->
+<meta name="twitter:image" content="https://dhruvb-cloud.github.io/Digital-Diwali/og-image.png"> <!-- Picture on the X card -->
+<script type="application/ld+json"> /* Structured data: a machine-readable description of the site for Google */
+{"@context":"https://schema.org","@type":"WebApplication","name":"Digital Diwali","url":"https://dhruvb-cloud.github.io/Digital-Diwali/","description":"A free online firecracker game where you light virtual crackers with a sparkler and see how they change the AQI and noise level.","applicationCategory":"GameApplication","operatingSystem":"Any (web browser)","inLanguage":"en","isAccessibleForFree":true,"audience":{"@type":"PeopleAudience","suggestedMinAge":3},"offers":{"@type":"Offer","price":"0","priceCurrency":"INR"}}
+</script> <!-- End of structured data -->
 <style> /* ---------- All the visual styling lives below ---------- */
   :root{ /* Global CSS variables that other rules reuse */
     --cw: 44px; /* Width of one firecracker icon in the bottom tray (phones) */
@@ -113,8 +131,16 @@
   #splash.hide{opacity:0;pointer-events:none} /* Fades away when started */
   .sp-card{text-align:center;max-width:460px} /* Centred content box */
   .sp-diyas{font-size:34px;letter-spacing:10px;animation:flick .4s ease-in-out infinite alternate} /* Row of lamps */
-  .sp-card h1{margin:6px 0 0;font-size:clamp(38px,11vw,72px);line-height:1.15;background:linear-gradient(#fff1b8,#ffb52e 60%,#ff7a18);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,160,40,.5))} /* Big golden greeting */
-  .sp-card h2{margin:4px 0 12px;font-size:clamp(20px,5vw,28px);color:#ffe9b8;font-weight:700} /* English greeting */
+  .sp-hi{display:block;margin:0;padding:.2em .1em .25em;font-size:clamp(38px,11vw,72px);font-weight:700;line-height:1.5;background:linear-gradient(#fff1b8,#ffb52e 60%,#ff7a18);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,160,40,.5))} /* Big golden Hindi greeting (padding stops the tall letters being cut off) */
+  .sp-card h1{margin:0 0 10px;font-size:clamp(24px,6vw,34px);color:#ffe9b8;font-weight:800;letter-spacing:.02em} /* The page's main heading: the site name */
+  .sp-about{margin:16px auto 0;max-width:380px;text-align:left;font-size:14px;line-height:1.55;color:#e8cfb0} /* Expandable "about" text (real words for search engines and parents) */
+  .sp-about summary{cursor:pointer;text-align:center;color:#ffd98a;font-weight:700} /* The clickable title of the about box */
+  .sp-about p{margin:8px 0 0;font-size:14px;max-width:none} /* Paragraphs inside the about box */
+  #share{display:flex;align-items:center;gap:8px;margin-top:9px} /* Row holding the share label and the three share buttons */
+  #share>span{font-size:12px;opacity:.85;letter-spacing:.04em;text-transform:uppercase;flex:1} /* The word "Share" */
+  #share button{pointer-events:auto;width:36px;height:36px;padding:0;border-radius:50%;border:1px solid rgba(255,200,87,.5);background:rgba(255,200,87,.14);color:#ffe9b8;cursor:pointer;display:flex;align-items:center;justify-content:center} /* Round share buttons (clickable even though the card itself is not) */
+  #share button:hover,#share button:focus-visible{background:rgba(255,200,87,.35);outline:none} /* Brighter when hovered or focused by keyboard */
+  #share svg{width:18px;height:18px;display:block} /* Icon size */
   .sp-card p{margin:0 auto;max-width:360px;font-size:clamp(15px,4vw,18px);line-height:1.5;color:#f4dcc0} /* Short explanation for parents and kids */
   #start{margin-top:22px;min-height:56px;padding:0 32px;border:0;border-radius:999px;font:inherit;font-size:19px;font-weight:800;color:#3a1600;background:linear-gradient(#ffe08a,#ffa726);box-shadow:0 0 28px rgba(255,170,50,.55);cursor:pointer} /* Big friendly start button */
   .sp-card small{display:block;margin-top:14px;font-size:13px;color:#d9bfa0} /* Volume reminder */
@@ -125,6 +151,7 @@
     #ctl{top:62px;left:8px} #ctl button{width:42px;height:42px;font-size:18px} /* Controls tuck under the title */
     #aqi{width:min(152px,46vw);padding:6px 8px 7px;right:8px} /* Narrow AQI card that never covers the title */
     #aqi .bar{display:none} /* Bars are hidden to save space */
+    #share{margin-top:5px;gap:5px} #share>span{display:none} #share button{width:30px;height:30px;flex:1;border-radius:10px} #share svg{width:15px;height:15px} /* Share row: just three small buttons that fit the narrow card */
     #praise{top:50%} /* Cheer pops up below the AQI card instead of over it */
     #aqi .row{font-size:11px} #aqiNum{font-size:28px} #aqiCat{font-size:12px} #aqi .big{margin:0 0 3px;gap:6px} /* Tighter numbers */
     .meta{margin-top:2px;white-space:nowrap;font-size:11px} .db{margin-top:4px;font-size:11px} #aqiCat{white-space:nowrap} /* One-line rows */
@@ -149,7 +176,7 @@
 <div id="toran" aria-hidden="true"></div> <!-- Marigold garland across the top -->
 <div id="flash"></div> <!-- Full-screen white flash overlay -->
 
-<div class="brand">🪔 Diwali Dhamaka<span class="sub">A pollution-free Diwali 🌿</span></div> <!-- Site title and tagline -->
+<div class="brand">🪔 Digital Diwali<span class="sub">A pollution-free Diwali 🌿</span></div> <!-- Site title and tagline -->
 <div id="ctl"> <!-- Control buttons -->
   <button id="snd" aria-label="Toggle sound" title="Sound on/off">🔊</button> <!-- Mute / unmute button -->
   <button id="calm" aria-label="Calm mode: less flashing and shaking" aria-pressed="false" title="Calm mode: less flashing and shaking">✨</button> <!-- Reduces flashes and shaking -->
@@ -163,6 +190,11 @@
   <div class="db"><span>🔊 Noise</span><b id="dbNum">38 dB</b></div> <!-- Current loudness in decibels -->
   <div class="bar"><i id="dbBar"></i></div> <!-- Loudness bar -->
   <div id="dbWarn"><span id="wDog" hidden>🐶 Painful for dogs!</span><span id="wHuman" hidden>👂 Painful for humans!</span></div> <!-- Warnings that appear when it gets too loud -->
+  <div id="share"><span>Share</span> <!-- Share row below the noise meter -->
+    <button id="shX" aria-label="Share on X (Twitter)" title="Share on X (Twitter)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-7.2 8.2L23 22h-6.6l-5.2-6.8L5.2 22H2l7.7-8.8L1.5 2h6.7l4.7 6.2L18.9 2Zm-1.2 18h1.8L7.1 3.9H5.2L17.7 20Z"/></svg></button> <!-- X / Twitter -->
+    <button id="shIn" aria-label="Share on LinkedIn" title="Share on LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.8v1.6h.05c.53-1 1.83-2 3.77-2 4.03 0 4.78 2.65 4.78 6.1V21h-4v-4.9c0-1.17 0-2.67-1.63-2.67s-1.87 1.27-1.87 2.58V21h-4V9.75Z"/></svg></button> <!-- LinkedIn -->
+    <button id="shIg" aria-label="Share on Instagram" title="Share on Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg></button> <!-- Instagram -->
+  </div> <!-- End of share row -->
   <button id="clear" hidden>🌬️ Clear the air</button> <!-- Appears when the air is dirty; clears the smoke quickly -->
 </div> <!-- End of AQI card -->
 
@@ -171,9 +203,13 @@
 <div id="splash" role="dialog" aria-label="Welcome"> <!-- Welcome screen -->
   <div class="sp-card"> <!-- Centred content -->
     <div class="sp-diyas" aria-hidden="true">🪔 🪔 🪔</div> <!-- Row of lamps -->
-    <h1>शुभ दीपावली</h1> <!-- "Shubh Deepavali" in Hindi -->
-    <h2>Happy Diwali!</h2> <!-- English greeting -->
-    <p>Light crackers with a sparkler — no smoke, no burns, no scared pets. 🌿</p> <!-- Short pitch -->
+    <span class="sp-hi" lang="hi">शुभ दीपावली</span> <!-- "Shubh Deepavali" in Hindi (marked as Hindi for search engines and screen readers) -->
+    <h1>Digital Diwali</h1> <!-- The main heading of the page: the site name -->
+    <p>Happy Diwali! Light crackers with a sparkler — no smoke, no burns, no scared pets. 🌿</p> <!-- Short pitch -->
+    <details class="sp-about"><summary>About Digital Diwali</summary> <!-- Expandable text with real words about the site -->
+      <p>Digital Diwali is a free online firecracker game. Pick an anar, rocket, chakri, roman candle, ladi or atom bomb, light it with a sparkler and watch fireworks fill a starry village sky, with no download needed.</p> <!-- What it is -->
+      <p>Every cracker you light raises the live air quality index (AQI) for your location and the noise level in decibels, and the sky turns smoky. It shows, safely, how real crackers affect the air, pets and people. Celebrate a pollution-free Diwali with your kids.</p> <!-- Why it matters -->
+    </details> <!-- End of about box -->
     <button id="start">🪔 Let's celebrate</button> <!-- Starts the experience (also unlocks sound) -->
     <small>🔊 Sound on — set the volume to a comfortable level</small> <!-- Gentle volume reminder -->
   </div> <!-- End of content -->
@@ -327,10 +363,12 @@ let ac = null, master = null, noiseBuf = null, muted = false, sparkNode = null; 
 let calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); // Calm mode starts ON if the device asks for reduced motion
 const VOL = 0.5; // Master volume (0 to 1): kept moderate because crackers are loud
 const DB_BASE = 38, DB_DOG = 80, DB_HUMAN = 120; // Quiet village night level, and the dB limits where it becomes painful for dogs / humans (edit freely)
+let maxDb = 0; // Loudest sound so far in this visit
 let dbLevel = DB_BASE, dogUntil = 0, humanUntil = 0, dbPeak = DB_BASE, peakUntil = 0; // Current loudness, when each warning ends, and the held peak reading shown for 3 seconds
 function addDb(db) { // Registers a loud sound of `db` decibels (works even if the sound is muted)
   const now = performance.now() / 1000; // Current time in seconds
   dbLevel = Math.max(dbLevel, Math.min(150, db)); // The meter jumps up to the loudest sound (max 150)
+  maxDb = Math.max(maxDb, Math.min(150, db)); // Remember the loudest sound of the whole visit (used in the share text)
   if (now > peakUntil || db >= dbPeak) { dbPeak = Math.min(150, db); peakUntil = now + 3; } // Remember the loudest recent sound so the number matches the warnings
   if (db >= DB_DOG) dogUntil = now + 3; // Too loud for dogs: keep that warning for 3 seconds
   if (db >= DB_HUMAN) humanUntil = now + 3; // Too loud for humans: keep that warning for 3 seconds
@@ -1072,6 +1110,29 @@ function frame(now) { // One frame of animation
 
 window.addEventListener('resize', resize); // Re-layout when the window changes size
 resize(); // Initial layout
+/* ---------- Sharing (X, LinkedIn, Instagram) ---------- */
+const SHARE_URL = 'https://dhruvb-cloud.github.io/Digital-Diwali/'; // The public address people are sent to (change it when you move to your own domain)
+function shareText() { // Builds the message, using the player's own numbers when they have lit crackers
+  if (bursts > 0) return `I celebrated Diwali with virtual crackers on Digital Diwali 🪔 — AQI +${Math.round(Math.max(added, 1))} and up to ${Math.round(maxDb)} dB of noise, but zero real smoke! Try a pollution-free Diwali 🌿`; // Personal message
+  return 'Celebrate a pollution-free Diwali with virtual crackers on Digital Diwali 🪔🎆 — no smoke, no noise, no scared pets!'; // Generic message if nothing was lit yet
+} // End of shareText
+function openShare(url) { window.open(url, '_blank', 'noopener,noreferrer'); } // Opens a share page in a new tab, safely
+$('#shX').addEventListener('click', e => { // X (Twitter) button
+  e.stopPropagation(); // Do not let the click reach the game underneath
+  openShare('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText()) + '&url=' + encodeURIComponent(SHARE_URL) + '&hashtags=Diwali,DigitalDiwali,PollutionFreeDiwali'); // X's official "compose post" link
+}); // End of click handler
+$('#shIn').addEventListener('click', e => { // LinkedIn button
+  e.stopPropagation(); // Do not let the click reach the game underneath
+  openShare('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(SHARE_URL)); // LinkedIn's official share link (it only accepts the link, not text)
+}); // End of click handler
+$('#shIg').addEventListener('click', async e => { // Instagram button
+  e.stopPropagation(); // Do not let the click reach the game underneath
+  const text = shareText(), data = { title: 'Digital Diwali', text, url: SHARE_URL}; // What we want to share
+  if (navigator.share) { try { await navigator.share(data); return; } catch (err) { if (err && err.name === 'AbortError') return; } } // On phones: open the phone's share sheet, where Instagram is one of the choices
+  try { await navigator.clipboard.writeText(text + ' ' + SHARE_URL); setHint('Link copied 📋 Paste it in your Instagram story, post or message'); } // On computers: Instagram has no web share link, so copy the text and link instead
+  catch (err) { setHint('Copy this link to share on Instagram: ' + SHARE_URL); } // If copying is blocked, show the link instead
+  openShare('https://www.instagram.com/'); // Then open Instagram so the player can paste it
+}); // End of click handler
 $('#clear').addEventListener('click', e => { // When 'Clear the air' is pressed
   e.stopPropagation(); ensureAudio(); clearing = true; hiss(1.8, 0.25, 300, 1400); setHint('Fresh air is coming… 🌬️'); // Start fast clearing with a gentle breeze sound
 }); // End of click handler

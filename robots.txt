@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dhruvb-cloud.github.io/Digital-Diwali/sitemap.xml

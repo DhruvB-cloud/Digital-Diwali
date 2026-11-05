@@ -9,6 +9,17 @@ Open `index.html` in a browser (no build step).
 - Top-right shows the live AQI for your location (Open-Meteo; falls back to Delhi).
   Each burst raises the AQI and blurs/hazes the starry sky.
 
+**Live:** https://dhruvb-cloud.github.io/Digital-Diwali/
+
+- Below the Noise meter there are share buttons for X, LinkedIn and Instagram.
+  (Instagram has no web share link, so phones open the share sheet and computers copy the text and link.)
+
+## SEO files
+- `index.html` head: title, description, canonical link, Open Graph / Twitter cards, JSON-LD.
+- `og-image.png`: the 1200×630 preview picture shown when the link is shared.
+- `robots.txt` and `sitemap.xml`: for search engines. When you move to your own domain, change the
+  address in these two files, in `SHARE_URL` (in the script) and in the canonical/Open Graph tags in `index.html`.
+
 ## Add your own firecracker
 Open `index.html` and edit the `CRACKERS` list (Section 1). Copy any entry and change:
 `id`, `name`, `type` (`fountain`, `rocket`, `bomb`, `spinner`, `string`, `candle` or `custom`),
