@@ -159,7 +159,7 @@
   <div class="row"><span title="Air Quality Index (US scale)">🌫️ AQI</span><span id="loc">—</span></div> <!-- Label and detected place name -->
   <div class="big"><span id="aqiNum">--</span><span id="aqiCat">&nbsp;</span></div> <!-- Big number and category -->
   <div class="bar"><i id="aqiBar"></i></div> <!-- Coloured progress bar -->
-  <div class="meta"><span id="delta">+0 from crackers</span><span id="count">🎆 0 lit</span></div> <!-- Extra AQI caused by you and burst count -->
+  <div class="meta"><span id="delta">+0 from crackers</span></div> <!-- Extra AQI caused by you and burst count -->
   <div class="db"><span>🔊 Noise</span><b id="dbNum">38 dB</b></div> <!-- Current loudness in decibels -->
   <div class="bar"><i id="dbBar"></i></div> <!-- Loudness bar -->
   <div id="dbWarn"><span id="wDog" hidden>🐶 Painful for dogs!</span><span id="wHuman" hidden>👂 Painful for humans!</span></div> <!-- Warnings that appear when it gets too loud -->
@@ -463,7 +463,25 @@ function buildBackdrop() { // Paints the still part of the sky once (gradient + 
     bg.beginPath(); bg.ellipse(rand(-L / 3, L / 3), gauss() * S * 0.03, rand(60, 220), rand(6, 22), rand(-0.15, 0.15), 0, 6.283); bg.fill(); // Stretched dark blob
   } // End of dust lanes loop
   bg.restore(); // Undo the tilt/translate
+  drawSkyline(); // Finally, add the black city silhouette along the bottom
 } // End of buildBackdrop
+function drawSkyline() { // Draws black building silhouettes (blocks, domes, towers) along the bottom of the sky
+  const th = $('#tray').offsetHeight || 130; // Height of the cracker tray, so buildings rise above it
+  bg.fillStyle = '#000'; // Pure black silhouettes
+  let x = -10; // Start just off the left edge
+  while (x < W) { // Place buildings until the screen is full
+    const w = rand(34, 92), h = th * 0.6 + rand(15, 115), type = pick(['block', 'block', 'dome', 'tower', 'stepped']); // Width, height and kind of building
+    bg.fillRect(x, H - h, w, h + 2); // The main body of the building
+    if (type === 'dome') { bg.beginPath(); bg.arc(x + w / 2, H - h, w * 0.38, Math.PI, 0); bg.fill(); bg.fillRect(x + w / 2 - 1.5, H - h - w * 0.38 - 14, 3, 14); } // A temple-style dome with a small spire
+    else if (type === 'tower') { bg.fillRect(x + w * 0.4, H - h - 38, w * 0.2, 38); bg.fillRect(x + w / 2 - 0.8, H - h - 62, 1.6, 24); } // A narrow tower with an antenna
+    else if (type === 'stepped') { bg.fillRect(x + w * 0.15, H - h - 16, w * 0.7, 16); bg.fillRect(x + w * 0.3, H - h - 28, w * 0.4, 12); } // A building with smaller levels on top
+    const winH = H - h; // Top of the building (for placing lit windows)
+    for (let wy = winH + 12; wy < H - 6; wy += 16) for (let wx = x + 7; wx < x + w - 8; wx += 12) { // A grid of possible windows
+      if (Math.random() < 0.09) { bg.fillStyle = `rgba(255,${190 + rand(0, 40) | 0},100,${rand(0.55, 0.9)})`; bg.fillRect(wx, wy, 3, 4.5); bg.fillStyle = '#000'; } // A few tiny warm lit windows (diya-like)
+    } // End of window grid
+    x += w + rand(-6, 8); // Move on to the next building (small gaps or overlaps)
+  } // End of building loop
+} // End of drawSkyline
 function drawSky(t, dt) { // Draws the sky every frame
   sky.clearRect(0, 0, W, H); // Wipe the previous frame
   sky.drawImage(bgC, 0, 0, W, H); // Paste the pre-drawn Milky Way
@@ -984,7 +1002,6 @@ function renderAQI() { // Updates the AQI card every frame
     document.documentElement.style.setProperty('--aqi-color', cat[2]); // Recolour the card
   } // End of category change
   $('#delta').textContent = compactUI.matches ? `+${Math.round(added)} AQI` : `+${Math.round(added)} from crackers`; // Show how much you added (shorter text on small screens)
-  $('#count').textContent = `🎆 ${bursts} lit`; // Show how many crackers were lit
 } // End of renderAQI
 function renderNoise(now, dt) { // Updates the decibel meter and its warnings
   dbLevel += (DB_BASE - dbLevel) * Math.min(1, dt * 1.6); // The level falls back toward the quiet night level
@@ -997,10 +1014,10 @@ function renderNoise(now, dt) { // Updates the decibel meter and its warnings
 } // End of renderNoise
 let lastBlur = -1, lastHaze = -1; // Remember last values to avoid needless style changes
 function renderAtmosphere() { // Makes the sky blurry and hazy as pollution grows
-  const blur = Math.round(Math.min(5.5, added * 0.04) * 4) / 4; // Blur in pixels (max 5.5 so the stars stay visible), rounded to quarter-pixels
-  if (blur !== lastBlur) { lastBlur = blur; skyC.style.filter = blur > 0 ? `blur(${blur}px) brightness(${1 - blur * 0.012})` : 'none'; } // Apply blur and very slight dimming
+  const blur = Math.round(Math.min(12, added * 0.08) * 4) / 4; // Blur in pixels (max 12), rounded to quarter-pixels
+  if (blur !== lastBlur) { lastBlur = blur; skyC.style.filter = blur > 0 ? `blur(${blur}px) brightness(${1 - blur * 0.025})` : 'none'; } // Apply blur and dimming: the more pollution, the murkier the sky
   $('#clear').hidden = !(added >= 12 || clearing); // Show the 'Clear the air' button once the air is dirty
-  const hz = Math.round(Math.min(0.5, added / 280) * 50) / 50; // Smog opacity (max 0.5)
+  const hz = Math.round(Math.min(0.72, added / 190) * 50) / 50; // Smog opacity (max 0.72)
   if (hz !== lastHaze) { lastHaze = hz; haze.style.opacity = hz; } // Apply smog
 } // End of renderAtmosphere
 async function loadAQI() { // Finds your location and fetches the real AQI
@@ -1042,7 +1059,7 @@ function frame(now) { // One frame of animation
   } // End of ignition check
   for (let i = effects.length - 1; i >= 0; i--) if (!effects[i].update(dt, k)) effects.splice(i, 1); // Run all effects, removing finished ones
   updateParts(dt); // Move sparks
-  added = Math.max(0, added - dt * (clearing ? 30 : 2)); // Pollution clears by itself (2 per second), or very fast after pressing 'Clear the air'
+  added = Math.max(0, added - dt * (clearing ? 30 : 0.1)); // Pollution clears very slowly by itself (0.1 AQI per second, so +100 takes about 17 minutes), or fast after pressing 'Clear the air'
   if (clearing && added <= 0.5) clearing = false; // Done clearing
   fx.clearRect(0, 0, W, H); // Clear the firework layer
   drawParts(); // Draw sparks, smoke, glows
