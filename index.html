@@ -141,6 +141,14 @@
   #share button{pointer-events:auto;width:36px;height:36px;padding:0;border-radius:50%;border:1px solid rgba(255,200,87,.5);background:rgba(255,200,87,.14);color:#ffe9b8;cursor:pointer;display:flex;align-items:center;justify-content:center} /* Round share buttons (clickable even though the card itself is not) */
   #share button:hover,#share button:focus-visible{background:rgba(255,200,87,.35);outline:none} /* Brighter when hovered or focused by keyboard */
   #share svg{width:18px;height:18px;display:block} /* Icon size */
+  #snap{position:fixed;left:12px;bottom:calc(var(--trayh,130px) + 12px);z-index:46;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:8px;border-radius:14px;background:rgba(34,20,10,.88);border:1px solid rgba(255,200,87,.5);box-shadow:0 0 22px rgba(255,170,50,.35);opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity .35s,transform .35s} /* The card that shows the automatic screenshot of your drawing (hidden until it is taken) */
+  #snap.show{opacity:1;transform:none;pointer-events:auto} /* Visible state */
+  #snap img{width:120px;height:auto;display:block;border-radius:8px;border:1px solid rgba(255,255,255,.2)} /* Thumbnail of the screenshot */
+  #snap .acts{display:flex;flex-direction:column;gap:6px} /* Buttons stacked beside the thumbnail */
+  #snap b{font-size:13px;color:#ffe9b8} /* Card title */
+  #snap a,#snap button{font:inherit;font-size:13px;font-weight:700;text-decoration:none;text-align:center;padding:6px 10px;border-radius:9px;border:1px solid rgba(255,200,87,.55);background:rgba(255,200,87,.16);color:#ffe9b8;cursor:pointer} /* Save / Share buttons */
+  #snap .x{background:none;border:0;color:#d9bfa0;font-weight:400;padding:2px} /* Quiet close button */
+  #snap [hidden]{display:none} /* Hidden buttons take no space */
   .sp-card p{margin:0 auto;max-width:360px;font-size:clamp(15px,4vw,18px);line-height:1.5;color:#f4dcc0} /* Short explanation for parents and kids */
   #start{margin-top:22px;min-height:56px;padding:0 32px;border:0;border-radius:999px;font:inherit;font-size:19px;font-weight:800;color:#3a1600;background:linear-gradient(#ffe08a,#ffa726);box-shadow:0 0 28px rgba(255,170,50,.55);cursor:pointer} /* Big friendly start button */
   .sp-card small{display:block;margin-top:14px;font-size:13px;color:#d9bfa0} /* Volume reminder */
@@ -200,6 +208,14 @@
 
 <div id="hint">Pick a firecracker from below ✨</div> <!-- Instruction text shown to the player -->
 <div id="praise" aria-hidden="true"></div> <!-- Cheerful word shown after each cracker -->
+<div id="snap" role="status"> <!-- Card showing the automatic screenshot of a Pyro Stick drawing -->
+  <img id="snapImg" alt="Screenshot of your drawing"> <!-- The screenshot -->
+  <div class="acts"><b>📸 Your drawing</b> <!-- Title and buttons -->
+    <a id="snapDl" download="digital-diwali-drawing.png">⬇ Save</a> <!-- Downloads the picture -->
+    <button id="snapSh" hidden>Share</button> <!-- Opens the share sheet (only where the browser supports it) -->
+    <button id="snapX" class="x">Close</button> <!-- Dismisses the card -->
+  </div> <!-- End of buttons -->
+</div> <!-- End of screenshot card -->
 <div id="splash" role="dialog" aria-label="Welcome"> <!-- Welcome screen -->
   <div class="sp-card"> <!-- Centred content -->
     <div class="sp-diyas" aria-hidden="true">🪔 🪔 🪔</div> <!-- Row of lamps -->
@@ -593,7 +609,7 @@ let pyroState = null; // While the Pyro Stick is in use: its timer and the lines
 let bursts = 0, added = 0, baseAQI = null, shown = 0; // Crackers burst, AQI added by you, real AQI, AQI currently displayed
 function trackPointer(e) { ptr.x = e.clientX; ptr.y = e.clientY; ptr.seen = true; ptr.touch = e.pointerType === 'touch'; } // Remember where the mouse/finger is
 window.addEventListener('pointermove', trackPointer); // Update when moving
-window.addEventListener('pointerdown', e => { trackPointer(e); if (!e.target.closest('#aqi, #ctl, #splash')) ptr.down = true; }); // Update when pressing, and remember that we are pressed (unless the press is on a button of the page)
+window.addEventListener('pointerdown', e => { trackPointer(e); if (!e.target.closest('#aqi, #ctl, #splash, #snap')) ptr.down = true; }); // Update when pressing, and remember that we are pressed (unless the press is on a button of the page)
 window.addEventListener('pointerup', () => { ptr.down = false; }); // Released
 window.addEventListener('pointercancel', () => { ptr.down = false; }); // The phone cancelled the touch
 function tip() { return { x: ptr.x, y: ptr.touch ? ptr.y - 70 : ptr.y }; } // Sparkler tip: on touch screens it floats above the finger so you can see it
@@ -638,6 +654,32 @@ function selectCracker(btn, def) { // Called when a cracker in the tray is tappe
 function dropStaged() { staged.el.remove(); staged.btn.classList.remove('picked'); staged = null; document.documentElement.style.removeProperty('--hintb'); } // Puts an unlit cracker back in the tray
 const PRAISE = ['Wow! ⭐', 'Dhamaka! 💥', 'Shabash! 🌟', 'Awesome! 🎇', 'Bahut khoob! ✨', 'Shubh Deepavali! 🪔']; // Cheerful words
 function praise() { const el = $('#praise'); el.textContent = pick(PRAISE); el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); } // Shows a random cheer that pops up and floats away
+let snapUrl = null, snapBlob = null, snapTimer = 0; // The latest screenshot (its web address and file data) and the timer that hides its card
+function hideSnap() { // Hides the screenshot card and frees the picture from memory
+  $('#snap').classList.remove('show'); clearTimeout(snapTimer); // Fade the card out
+  setTimeout(() => { if (snapUrl && !$('#snap').classList.contains('show')) { URL.revokeObjectURL(snapUrl); snapUrl = null; } }, 500); // Free the memory after the fade
+} // End of hideSnap
+function takeSnap() { // Takes a screenshot of the sky + the drawing and shows it in the card
+  const c = document.createElement('canvas'); c.width = fxC.width; c.height = fxC.height; // A new hidden canvas the same size as the screen
+  const g = c.getContext('2d'); g.drawImage(skyC, 0, 0, c.width, c.height); g.drawImage(fxC, 0, 0); // Paint the night sky and then the glowing drawing on top
+  g.font = `700 ${Math.round(16 * DPR)}px sans-serif`; g.textAlign = 'right'; g.fillStyle = 'rgba(255,215,140,.85)'; // Style for a small signature
+  g.fillText('🪔 Digital Diwali', c.width - 14 * DPR, c.height - 14 * DPR); // Sign the picture in the bottom-right corner
+  c.toBlob(b => { // Turn the canvas into a PNG file
+    if (!b) return; // Could not make a picture
+    if (snapUrl) URL.revokeObjectURL(snapUrl); // Free the previous screenshot
+    snapBlob = b; snapUrl = URL.createObjectURL(b); // Keep the file and make a temporary address for it
+    $('#snapImg').src = snapUrl; $('#snapDl').href = snapUrl; // Show it in the card and let the Save button download it
+    $('#snapSh').hidden = !navigator.share; // Show the Share button only if the browser can share
+    $('#snap').classList.add('show'); clearTimeout(snapTimer); snapTimer = setTimeout(hideSnap, 15000); // Show the card for 15 seconds
+  }, 'image/png'); // Ask for a PNG
+} // End of takeSnap
+$('#snapX').addEventListener('click', hideSnap); // Close button
+$('#snapSh').addEventListener('click', async () => { // Share button
+  if (!snapBlob) return; // Nothing to share
+  const file = new File([snapBlob], 'digital-diwali-drawing.png', { type: 'image/png' }); // The picture as a file
+  const data = { title: 'Digital Diwali', text: 'I wrote this in the air with a Pyro Stick on Digital Diwali 🪔✨', url: SHARE_URL }; // Message to go with it
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ ...data, files: [file] }); else await navigator.share(data); } catch (err) {} // Share the picture if possible, otherwise just the link; ignore "cancelled"
+}); // End of click handler
 let clearing = false; // True while the 'Clear the air' button is working
 function updateArrows() { // Shows arrows when the tray has more crackers off-screen
   const t = $('#tray'); // The tray
@@ -1035,6 +1077,7 @@ const PRESETS = { // The collection of behaviours
           if (P.t >= dur) { // Burnt out
             sparklerOn = false; document.body.classList.remove('sparkler'); stopSparklerSound(); P.cur = null; ptr.down = false; // The stick is finished: normal cursor again
             setHint('The stick burnt out! 🎇'); // Tell the player
+            P.snap = P.strokes.length > 0; // If something was drawn, take the screenshot just before the drawing starts to fade
           } // End of burn-out
         } else if (P.started) { // The stick is out: the drawing fades away
           P.fade += dt; // Fade timer
@@ -1057,6 +1100,7 @@ const PRESETS = { // The collection of behaviours
           } // End of pieces
         } // End of lines
         g.restore(); // Restore drawing state
+        if (P.snap) { P.snap = false; takeSnap(); flashScreen(0.12); } // The drawing is fully bright right now: take the screenshot (with a gentle camera flash)
       } // End of draw
     }); // End of effect
   } // End of pyro
