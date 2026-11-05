@@ -4,8 +4,26 @@
 <meta charset="utf-8"> <!-- Use UTF-8 so emoji and symbols display properly -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> <!-- Makes the page fit phone screens and stops pinch-zoom -->
 <meta name="theme-color" content="#01030c"> <!-- Colours the phone browser bar to match the night sky -->
-<title>Diwali Dhamaka</title> <!-- Text shown in the browser tab -->
-<meta name="description" content="Celebrate Diwali digitally under a starry village sky."> <!-- Short description for search engines -->
+<title>Digital Diwali – Play Virtual Firecrackers Online | Pollution-Free Diwali</title> <!-- Text shown in the browser tab and as the blue link in Google -->
+<meta name="description" content="Light virtual crackers with a sparkler under a starry sky. Free, no download. See how crackers change the AQI and noise, and enjoy a pollution-free Diwali with kids and pets."> <!-- The grey text under the link in Google -->
+<meta name="robots" content="index, follow, max-image-preview:large"> <!-- Tells search engines they may list this page -->
+<link rel="canonical" href="https://dhruvb-cloud.github.io/Digital-Diwali/"> <!-- The one official address of this page (change it when you move to your own domain) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%94%3C/text%3E%3C/svg%3E"> <!-- Small lamp icon shown in the browser tab -->
+<meta property="og:type" content="website"> <!-- Open Graph: how the link looks when shared on WhatsApp, Facebook, LinkedIn... -->
+<meta property="og:site_name" content="Digital Diwali"> <!-- Site name on the share card -->
+<meta property="og:title" content="Digital Diwali – Burst Crackers Without the Smoke 🪔"> <!-- Title on the share card -->
+<meta property="og:description" content="Light virtual crackers with a sparkler and watch the AQI and noise change. A pollution-free Diwali for kids, pets and parents."> <!-- Text on the share card -->
+<meta property="og:url" content="https://dhruvb-cloud.github.io/Digital-Diwali/"> <!-- Address the card points to -->
+<meta property="og:image" content="https://dhruvb-cloud.github.io/Digital-Diwali/og-image.png"> <!-- Preview picture on the share card (1200x630) -->
+<meta property="og:image:width" content="1200"> <!-- Picture width -->
+<meta property="og:image:height" content="630"> <!-- Picture height -->
+<meta name="twitter:card" content="summary_large_image"> <!-- Twitter/X: show a big picture card -->
+<meta name="twitter:title" content="Digital Diwali – Burst Crackers Without the Smoke 🪔"> <!-- Title on the X card -->
+<meta name="twitter:description" content="Light virtual crackers and watch the AQI and noise change. A pollution-free Diwali!"> <!-- Text on the X card -->
+<meta name="twitter:image" content="https://dhruvb-cloud.github.io/Digital-Diwali/og-image.png"> <!-- Picture on the X card -->
+<script type="application/ld+json"> /* Structured data: a machine-readable description of the site for Google */
+{"@context":"https://schema.org","@type":"WebApplication","name":"Digital Diwali","url":"https://dhruvb-cloud.github.io/Digital-Diwali/","description":"A free online firecracker game where you light virtual crackers with a sparkler and see how they change the AQI and noise level.","applicationCategory":"GameApplication","operatingSystem":"Any (web browser)","inLanguage":"en","isAccessibleForFree":true,"audience":{"@type":"PeopleAudience","suggestedMinAge":3},"offers":{"@type":"Offer","price":"0","priceCurrency":"INR"}}
+</script> <!-- End of structured data -->
 <style> /* ---------- All the visual styling lives below ---------- */
   :root{ /* Global CSS variables that other rules reuse */
     --cw: 44px; /* Width of one firecracker icon in the bottom tray (phones) */
@@ -113,8 +131,24 @@
   #splash.hide{opacity:0;pointer-events:none} /* Fades away when started */
   .sp-card{text-align:center;max-width:460px} /* Centred content box */
   .sp-diyas{font-size:34px;letter-spacing:10px;animation:flick .4s ease-in-out infinite alternate} /* Row of lamps */
-  .sp-card h1{margin:6px 0 0;font-size:clamp(38px,11vw,72px);line-height:1.15;background:linear-gradient(#fff1b8,#ffb52e 60%,#ff7a18);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,160,40,.5))} /* Big golden greeting */
-  .sp-card h2{margin:4px 0 12px;font-size:clamp(20px,5vw,28px);color:#ffe9b8;font-weight:700} /* English greeting */
+  .sp-hi{display:block;margin:0;padding:.2em .1em .25em;font-size:clamp(38px,11vw,72px);font-weight:700;line-height:1.5;background:linear-gradient(#fff1b8,#ffb52e 60%,#ff7a18);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,160,40,.5))} /* Big golden Hindi greeting (padding stops the tall letters being cut off) */
+  .sp-card h1{margin:0 0 10px;font-size:clamp(24px,6vw,34px);color:#ffe9b8;font-weight:800;letter-spacing:.02em} /* The page's main heading: the site name */
+  .sp-about{margin:16px auto 0;max-width:380px;text-align:left;font-size:14px;line-height:1.55;color:#e8cfb0} /* Expandable "about" text (real words for search engines and parents) */
+  .sp-about summary{cursor:pointer;text-align:center;color:#ffd98a;font-weight:700} /* The clickable title of the about box */
+  .sp-about p{margin:8px 0 0;font-size:14px;max-width:none} /* Paragraphs inside the about box */
+  #share{display:flex;align-items:center;gap:8px;margin-top:9px} /* Row holding the share label and the three share buttons */
+  #share>span{font-size:12px;opacity:.85;letter-spacing:.04em;text-transform:uppercase;flex:1} /* The word "Share" */
+  #share button{pointer-events:auto;width:36px;height:36px;padding:0;border-radius:50%;border:1px solid rgba(255,200,87,.5);background:rgba(255,200,87,.14);color:#ffe9b8;cursor:pointer;display:flex;align-items:center;justify-content:center} /* Round share buttons (clickable even though the card itself is not) */
+  #share button:hover,#share button:focus-visible{background:rgba(255,200,87,.35);outline:none} /* Brighter when hovered or focused by keyboard */
+  #share svg{width:18px;height:18px;display:block} /* Icon size */
+  #snap{position:fixed;left:12px;bottom:calc(var(--trayh,130px) + 12px);z-index:46;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:8px;border-radius:14px;background:rgba(34,20,10,.88);border:1px solid rgba(255,200,87,.5);box-shadow:0 0 22px rgba(255,170,50,.35);opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity .35s,transform .35s} /* The card that shows the automatic screenshot of your drawing (hidden until it is taken) */
+  #snap.show{opacity:1;transform:none;pointer-events:auto} /* Visible state */
+  #snap img{width:120px;height:auto;display:block;border-radius:8px;border:1px solid rgba(255,255,255,.2)} /* Thumbnail of the screenshot */
+  #snap .acts{display:flex;flex-direction:column;gap:6px} /* Buttons stacked beside the thumbnail */
+  #snap b{font-size:13px;color:#ffe9b8} /* Card title */
+  #snap a,#snap button{font:inherit;font-size:13px;font-weight:700;text-decoration:none;text-align:center;padding:6px 10px;border-radius:9px;border:1px solid rgba(255,200,87,.55);background:rgba(255,200,87,.16);color:#ffe9b8;cursor:pointer} /* Save / Share buttons */
+  #snap .x{background:none;border:0;color:#d9bfa0;font-weight:400;padding:2px} /* Quiet close button */
+  #snap [hidden]{display:none} /* Hidden buttons take no space */
   .sp-card p{margin:0 auto;max-width:360px;font-size:clamp(15px,4vw,18px);line-height:1.5;color:#f4dcc0} /* Short explanation for parents and kids */
   #start{margin-top:22px;min-height:56px;padding:0 32px;border:0;border-radius:999px;font:inherit;font-size:19px;font-weight:800;color:#3a1600;background:linear-gradient(#ffe08a,#ffa726);box-shadow:0 0 28px rgba(255,170,50,.55);cursor:pointer} /* Big friendly start button */
   .sp-card small{display:block;margin-top:14px;font-size:13px;color:#d9bfa0} /* Volume reminder */
@@ -125,6 +159,7 @@
     #ctl{top:62px;left:8px} #ctl button{width:42px;height:42px;font-size:18px} /* Controls tuck under the title */
     #aqi{width:min(152px,46vw);padding:6px 8px 7px;right:8px} /* Narrow AQI card that never covers the title */
     #aqi .bar{display:none} /* Bars are hidden to save space */
+    #share{margin-top:5px;gap:5px} #share>span{display:none} #share button{width:30px;height:30px;flex:1;border-radius:10px} #share svg{width:15px;height:15px} /* Share row: just three small buttons that fit the narrow card */
     #praise{top:50%} /* Cheer pops up below the AQI card instead of over it */
     #aqi .row{font-size:11px} #aqiNum{font-size:28px} #aqiCat{font-size:12px} #aqi .big{margin:0 0 3px;gap:6px} /* Tighter numbers */
     .meta{margin-top:2px;white-space:nowrap;font-size:11px} .db{margin-top:4px;font-size:11px} #aqiCat{white-space:nowrap} /* One-line rows */
@@ -149,7 +184,7 @@
 <div id="toran" aria-hidden="true"></div> <!-- Marigold garland across the top -->
 <div id="flash"></div> <!-- Full-screen white flash overlay -->
 
-<div class="brand">🪔 Diwali Dhamaka<span class="sub">A pollution-free Diwali 🌿</span></div> <!-- Site title and tagline -->
+<div class="brand">🪔 Digital Diwali<span class="sub">A pollution-free Diwali 🌿</span></div> <!-- Site title and tagline -->
 <div id="ctl"> <!-- Control buttons -->
   <button id="snd" aria-label="Toggle sound" title="Sound on/off">🔊</button> <!-- Mute / unmute button -->
   <button id="calm" aria-label="Calm mode: less flashing and shaking" aria-pressed="false" title="Calm mode: less flashing and shaking">✨</button> <!-- Reduces flashes and shaking -->
@@ -163,17 +198,34 @@
   <div class="db"><span>🔊 Noise</span><b id="dbNum">38 dB</b></div> <!-- Current loudness in decibels -->
   <div class="bar"><i id="dbBar"></i></div> <!-- Loudness bar -->
   <div id="dbWarn"><span id="wDog" hidden>🐶 Painful for dogs!</span><span id="wHuman" hidden>👂 Painful for humans!</span></div> <!-- Warnings that appear when it gets too loud -->
+  <div id="share"><span>Share</span> <!-- Share row below the noise meter -->
+    <button id="shX" aria-label="Share on X (Twitter)" title="Share on X (Twitter)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-7.2 8.2L23 22h-6.6l-5.2-6.8L5.2 22H2l7.7-8.8L1.5 2h6.7l4.7 6.2L18.9 2Zm-1.2 18h1.8L7.1 3.9H5.2L17.7 20Z"/></svg></button> <!-- X / Twitter -->
+    <button id="shIn" aria-label="Share on LinkedIn" title="Share on LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.8v1.6h.05c.53-1 1.83-2 3.77-2 4.03 0 4.78 2.65 4.78 6.1V21h-4v-4.9c0-1.17 0-2.67-1.63-2.67s-1.87 1.27-1.87 2.58V21h-4V9.75Z"/></svg></button> <!-- LinkedIn -->
+    <button id="shIg" aria-label="Share on Instagram" title="Share on Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg></button> <!-- Instagram -->
+  </div> <!-- End of share row -->
   <button id="clear" hidden>🌬️ Clear the air</button> <!-- Appears when the air is dirty; clears the smoke quickly -->
 </div> <!-- End of AQI card -->
 
 <div id="hint">Pick a firecracker from below ✨</div> <!-- Instruction text shown to the player -->
 <div id="praise" aria-hidden="true"></div> <!-- Cheerful word shown after each cracker -->
+<div id="snap" role="status"> <!-- Card showing the automatic screenshot of a Pyro Stick drawing -->
+  <img id="snapImg" alt="Screenshot of your drawing"> <!-- The screenshot -->
+  <div class="acts"><b>📸 Your drawing</b> <!-- Title and buttons -->
+    <a id="snapDl" download="digital-diwali-drawing.png">⬇ Save</a> <!-- Downloads the picture -->
+    <button id="snapSh" hidden>Share</button> <!-- Opens the share sheet (only where the browser supports it) -->
+    <button id="snapX" class="x">Close</button> <!-- Dismisses the card -->
+  </div> <!-- End of buttons -->
+</div> <!-- End of screenshot card -->
 <div id="splash" role="dialog" aria-label="Welcome"> <!-- Welcome screen -->
   <div class="sp-card"> <!-- Centred content -->
     <div class="sp-diyas" aria-hidden="true">🪔 🪔 🪔</div> <!-- Row of lamps -->
-    <h1>शुभ दीपावली</h1> <!-- "Shubh Deepavali" in Hindi -->
-    <h2>Happy Diwali!</h2> <!-- English greeting -->
-    <p>Light crackers with a sparkler — no smoke, no burns, no scared pets. 🌿</p> <!-- Short pitch -->
+    <span class="sp-hi" lang="hi">शुभ दीपावली</span> <!-- "Shubh Deepavali" in Hindi (marked as Hindi for search engines and screen readers) -->
+    <h1>Digital Diwali</h1> <!-- The main heading of the page: the site name -->
+    <p>Happy Diwali! Light crackers with a sparkler — no smoke, no burns, no scared pets. 🌿</p> <!-- Short pitch -->
+    <details class="sp-about"><summary>About Digital Diwali</summary> <!-- Expandable text with real words about the site -->
+      <p>Digital Diwali is a free online firecracker game. Pick an anar, rocket, chakri, roman candle, ladi or atom bomb, light it with a sparkler and watch fireworks fill a starry village sky, with no download needed.</p> <!-- What it is -->
+      <p>Every cracker you light raises the live air quality index (AQI) for your location and the noise level in decibels, and the sky turns smoky. It shows, safely, how real crackers affect the air, pets and people. Celebrate a pollution-free Diwali with your kids.</p> <!-- Why it matters -->
+    </details> <!-- End of about box -->
     <button id="start">🪔 Let's celebrate</button> <!-- Starts the experience (also unlocks sound) -->
     <small>🔊 Sound on — set the volume to a comfortable level</small> <!-- Gentle volume reminder -->
   </div> <!-- End of content -->
@@ -291,6 +343,16 @@ const CRACKERS = [ // The master list of all firecrackers
       '<circle class="fuse-tip" cx="31" cy="20" r="3" fill="none"/>' // Fuse tip
     ]) } // End of Ladi
 
+  ,{ id: 'pyro', name: 'Pyro Stick', type: 'pyro', pollution: 6, // A hand-held sparkling stick: light it, then write or draw in the air for 6 seconds
+    opts: { dur: 6 }, // How many seconds it burns once you start drawing
+    art: [ // SVG drawing lines
+      '<rect x="28.5" y="62" width="3" height="56" rx="1.5" fill="#b9bcc4"/>', // Metal handle wire
+      '<rect x="24" y="26" width="12" height="40" rx="3" fill="#3d3a46"/>', // Dark coated stick
+      '<rect x="24" y="34" width="12" height="5" fill="#e1306c"/><rect x="24" y="46" width="12" height="5" fill="#f4c542"/><rect x="24" y="58" width="12" height="4" fill="#3ddc84"/>', // Colour bands (pink, gold, green)
+      '<path d="M30 26 q-4 -8 2 -14" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="32" cy="12" r="3" fill="none"/>' // Fuse tip
+    ] }, // End of Pyro Stick
+
   /* ---------- ADD YOUR OWN CRACKER BELOW (copy one block above, add a comma before it) ----------
   ,{ id: 'mine', name: 'My Cracker', type: 'fountain', pollution: 12,
      opts: { dur: 4, colors: [330, 190], nozzle: [30, 50] },
@@ -327,10 +389,12 @@ let ac = null, master = null, noiseBuf = null, muted = false, sparkNode = null; 
 let calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); // Calm mode starts ON if the device asks for reduced motion
 const VOL = 0.5; // Master volume (0 to 1): kept moderate because crackers are loud
 const DB_BASE = 38, DB_DOG = 80, DB_HUMAN = 120; // Quiet village night level, and the dB limits where it becomes painful for dogs / humans (edit freely)
+let maxDb = 0; // Loudest sound so far in this visit
 let dbLevel = DB_BASE, dogUntil = 0, humanUntil = 0, dbPeak = DB_BASE, peakUntil = 0; // Current loudness, when each warning ends, and the held peak reading shown for 3 seconds
 function addDb(db) { // Registers a loud sound of `db` decibels (works even if the sound is muted)
   const now = performance.now() / 1000; // Current time in seconds
   dbLevel = Math.max(dbLevel, Math.min(150, db)); // The meter jumps up to the loudest sound (max 150)
+  maxDb = Math.max(maxDb, Math.min(150, db)); // Remember the loudest sound of the whole visit (used in the share text)
   if (now > peakUntil || db >= dbPeak) { dbPeak = Math.min(150, db); peakUntil = now + 3; } // Remember the loudest recent sound so the number matches the warnings
   if (db >= DB_DOG) dogUntil = now + 3; // Too loud for dogs: keep that warning for 3 seconds
   if (db >= DB_HUMAN) humanUntil = now + 3; // Too loud for humans: keep that warning for 3 seconds
@@ -540,11 +604,14 @@ for (const c of CRACKERS) { // Make one button for every cracker in the list
    ===================================================================== */
 let staged = null; // The cracker currently in the middle: { def, el, btn, ready, lit }
 let sparklerOn = false; // True while the sparkler replaces the cursor
-const ptr = { x: -999, y: -999, seen: false, touch: false }; // Latest pointer position and whether it is a finger
+const ptr = { x: -999, y: -999, seen: false, touch: false, down: false }; // Latest pointer position, whether it is a finger, and whether the button / finger is pressed
+let pyroState = null; // While the Pyro Stick is in use: its timer and the lines drawn so far (null otherwise)
 let bursts = 0, added = 0, baseAQI = null, shown = 0; // Crackers burst, AQI added by you, real AQI, AQI currently displayed
 function trackPointer(e) { ptr.x = e.clientX; ptr.y = e.clientY; ptr.seen = true; ptr.touch = e.pointerType === 'touch'; } // Remember where the mouse/finger is
 window.addEventListener('pointermove', trackPointer); // Update when moving
-window.addEventListener('pointerdown', trackPointer); // Update when pressing
+window.addEventListener('pointerdown', e => { trackPointer(e); if (!e.target.closest('#aqi, #ctl, #splash, #snap')) ptr.down = true; }); // Update when pressing, and remember that we are pressed (unless the press is on a button of the page)
+window.addEventListener('pointerup', () => { ptr.down = false; }); // Released
+window.addEventListener('pointercancel', () => { ptr.down = false; }); // The phone cancelled the touch
 function tip() { return { x: ptr.x, y: ptr.touch ? ptr.y - 70 : ptr.y }; } // Sparkler tip: on touch screens it floats above the finger so you can see it
 function setHint(msg) { // Shows or hides the instruction text
   const h = $('#hint'); // Find the hint pill
@@ -567,6 +634,7 @@ function placeStaged(animate) { // Moves the chosen cracker to its target place
 } // End of placeStaged
 function selectCracker(btn, def) { // Called when a cracker in the tray is tapped
   if (staged && staged.lit) return; // Ignore taps while one is burning
+  if (pyroState) return; // Ignore taps while the Pyro Stick is being used
   ensureAudio(); // Make sure sound is unlocked
   if (staged) dropStaged(); // If another cracker was waiting, put it back
   const r = btn.querySelector('svg').getBoundingClientRect(); // Where the icon is now
@@ -586,6 +654,32 @@ function selectCracker(btn, def) { // Called when a cracker in the tray is tappe
 function dropStaged() { staged.el.remove(); staged.btn.classList.remove('picked'); staged = null; document.documentElement.style.removeProperty('--hintb'); } // Puts an unlit cracker back in the tray
 const PRAISE = ['Wow! ⭐', 'Dhamaka! 💥', 'Shabash! 🌟', 'Awesome! 🎇', 'Bahut khoob! ✨', 'Shubh Deepavali! 🪔']; // Cheerful words
 function praise() { const el = $('#praise'); el.textContent = pick(PRAISE); el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); } // Shows a random cheer that pops up and floats away
+let snapUrl = null, snapBlob = null, snapTimer = 0; // The latest screenshot (its web address and file data) and the timer that hides its card
+function hideSnap() { // Hides the screenshot card and frees the picture from memory
+  $('#snap').classList.remove('show'); clearTimeout(snapTimer); // Fade the card out
+  setTimeout(() => { if (snapUrl && !$('#snap').classList.contains('show')) { URL.revokeObjectURL(snapUrl); snapUrl = null; } }, 500); // Free the memory after the fade
+} // End of hideSnap
+function takeSnap() { // Takes a screenshot of the sky + the drawing and shows it in the card
+  const c = document.createElement('canvas'); c.width = fxC.width; c.height = fxC.height; // A new hidden canvas the same size as the screen
+  const g = c.getContext('2d'); g.drawImage(skyC, 0, 0, c.width, c.height); g.drawImage(fxC, 0, 0); // Paint the night sky and then the glowing drawing on top
+  g.font = `700 ${Math.round(16 * DPR)}px sans-serif`; g.textAlign = 'right'; g.fillStyle = 'rgba(255,215,140,.85)'; // Style for a small signature
+  g.fillText('🪔 Digital Diwali', c.width - 14 * DPR, c.height - 14 * DPR); // Sign the picture in the bottom-right corner
+  c.toBlob(b => { // Turn the canvas into a PNG file
+    if (!b) return; // Could not make a picture
+    if (snapUrl) URL.revokeObjectURL(snapUrl); // Free the previous screenshot
+    snapBlob = b; snapUrl = URL.createObjectURL(b); // Keep the file and make a temporary address for it
+    $('#snapImg').src = snapUrl; $('#snapDl').href = snapUrl; // Show it in the card and let the Save button download it
+    $('#snapSh').hidden = !navigator.share; // Show the Share button only if the browser can share
+    $('#snap').classList.add('show'); clearTimeout(snapTimer); snapTimer = setTimeout(hideSnap, 15000); // Show the card for 15 seconds
+  }, 'image/png'); // Ask for a PNG
+} // End of takeSnap
+$('#snapX').addEventListener('click', hideSnap); // Close button
+$('#snapSh').addEventListener('click', async () => { // Share button
+  if (!snapBlob) return; // Nothing to share
+  const file = new File([snapBlob], 'digital-diwali-drawing.png', { type: 'image/png' }); // The picture as a file
+  const data = { title: 'Digital Diwali', text: 'I wrote this in the air with a Pyro Stick on Digital Diwali 🪔✨', url: SHARE_URL }; // Message to go with it
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ ...data, files: [file] }); else await navigator.share(data); } catch (err) {} // Share the picture if possible, otherwise just the link; ignore "cancelled"
+}); // End of click handler
 let clearing = false; // True while the 'Clear the air' button is working
 function updateArrows() { // Shows arrows when the tray has more crackers off-screen
   const t = $('#tray'); // The tray
@@ -709,7 +803,8 @@ function drawParts() { // Paints all sparks, smoke and lights
    ===================================================================== */
 function shell(x, y, style, hue, loud = 1, size = 1) { // Explodes a firework at (x,y). style = peony | ring | willow | crossette; size scales how far sparks fly
   const first = parts.length; // Remember where this shell's sparks start in the list
-  const n = style === 'ring' ? 80 : 130; // Number of sparks
+  size = Math.min(size, Math.max(1, W / 260)); // Never let a burst grow much wider than the screen (small phones get smaller bursts)
+  const n = Math.floor((style === 'ring' ? 80 : 130) * Math.min(1.8, Math.sqrt(size))); // Number of sparks (bigger bursts get more sparks so they stay full)
   const hue2 = (hue + 150 + rand(0, 60)) % 360; // A second contrasting colour
   if (style === 'peony') { // Classic round burst
     for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = 1 + Math.sqrt(Math.random()) * 5.2; // Random direction and speed
@@ -741,12 +836,22 @@ const SHELLS = ['peony', 'ring', 'willow', 'crossette', 'peony']; // Default lis
 function igniteAnimation(onDone) { // Fuse-burning sequence before the main effect
   const s = staged; s.lit = true; s.el.classList.add('lit'); // Mark as lit and make it shiver
   setHint(null); // Hide the hint text
-  hiss(0.7, 0.35, 3500, 7000, 'highpass'); // Fuse sizzle sound
+  const BURN = 1.4; // How many seconds the fuse takes to burn
+  hiss(BURN, 0.35, 3500, 7000, 'highpass'); // Fuse sizzle sound for the whole burn
+  const fuse = s.el.querySelector('path[stroke="#d9c48a"]'); // The fuse drawing (the thin cream-coloured wire in the artwork), if the cracker has one
+  const total = fuse ? fuse.getTotalLength() : 0; // How long the fuse is, in drawing units
   effects.push({ t: 0, update(dt) { // Add a small timed effect
-    this.t += dt; const f = fuseScreen(); // Count time; find the fuse tip
-    for (let i = 0; i < 4; i++) spark(f.x, f.y, rand(-2.5, 2.5), rand(-3.5, 0.5), { life: rand(0.2, 0.5), h: rand(30, 55), l: 70, g: 0.12, s: 1.4 }); // Little sparks from the fuse
-    glow(f.x, f.y, 50, 40, 0.8, 4); // Tiny glow at the fuse tip
-    if (this.t > 0.7) { s.el.classList.remove('lit'); onDone(); return false; } // After 0.7 s stop shivering and start the real effect
+    this.t += dt; const left = Math.max(0, 1 - this.t / BURN); // Time passed, and the fraction of fuse still unburnt (1 = whole, 0 = gone)
+    let f; // Where the glowing end of the fuse is on screen
+    if (fuse) { // If we can see the fuse: shrink it
+      fuse.style.strokeDasharray = `${left * total} ${total * 2}`; // Only draw the first part of the fuse; the burnt part (the tip end) disappears
+      fuse.style.opacity = left < 0.02 ? 0 : 1; // Hide the last tiny dot when it is fully burnt
+      const p = fuse.getPointAtLength(left * total), m = fuse.getScreenCTM(); // The point where the fire is now, and the matrix that converts drawing units to screen pixels
+      f = m ? new DOMPoint(p.x, p.y).matrixTransform(m) : fuseScreen(); // Fire position on screen (fallback: the original tip)
+    } else f = fuseScreen(); // Crackers without a drawn fuse just use the marked tip
+    for (let i = 0; i < 4; i++) spark(f.x, f.y, rand(-2.5, 2.5), rand(-3.5, 0.5), { life: rand(0.2, 0.5), h: rand(30, 55), l: 70, g: 0.12, s: 1.4 }); // Little sparks from the burning end
+    glow(f.x, f.y, 50, 40, 0.8, 4); // Tiny glow at the burning end
+    if (this.t > BURN) { s.el.classList.remove('lit'); onDone(); return false; } // When the fuse is gone, stop shivering and start the real effect
     return true; // Otherwise keep running
   } }); // End of fuse effect
 } // End of igniteAnimation
@@ -783,7 +888,7 @@ const PRESETS = { // The collection of behaviours
     const o = c.opts, R = staged.el.getBoundingClientRect(), S = svgPt(R, o.launch[0], o.launch[1]); // Settings, box, launch point
     const shells = o.shells ?? SHELLS; // Shell styles allowed
     staged.el.style.opacity = 0; // Hide the cracker picture (the rocket "leaves")
-    const ty = H * rand(0.14, 0.32); // Height where it will explode
+    const ty = H * rand(0.24, 0.4); // Height where it will explode (a bit lower so the bigger bursts stay on screen)
     hiss(1.5, 0.5, 500, 2600); // Whoosh sound
     bang(0.9, 0.8); flashScreen(0.35); shake(true); glow(S.x, S.y, 320, 40, 1.2, 2); ring(S.x, S.y, 700); // BIG launch sparkle: bang, flash, shake, light and ring
     for (let i = 0; i < 160; i++) { const a = Math.random() * 6.283, v = rand(1.5, 9); // Burst of sparks in every direction
@@ -796,10 +901,10 @@ const PRESETS = { // The collection of behaviours
       glow(this.x, this.y, 60, 35, 0.5, 5); // Light around the rocket
       if (this.y <= ty || this.vy > -3) { // Reached its height: explode!
         const hue = Math.floor(rand(0, 360)), x = this.x, y = this.y; // Random colour and position
-        shell(x, y, pick(shells), hue, 1); shake(false); pollute(c.pollution * 0.5); // Main burst
+        shell(x, y, pick(shells), hue, 1, 1.9); shake(false); pollute(c.pollution * 0.5); // Main burst (1.9x wider than a normal one)
         const extra = o.extra ?? 5; // How many follow-up bursts
         for (let i = 0; i < extra; i++) setTimeout(() => { // Follow-up bursts around the first one
-          shell(x + rand(-190, 190), y + rand(-60, 110), pick(shells), (hue + (i + 1) * 360 / (extra + 1)) % 360, 0.8, 1.1); // Each burst gets a different colour around the colour wheel
+          shell(x + rand(-1, 1) * Math.min(340, W * 0.3), y + rand(-60, 130), pick(shells), (hue + (i + 1) * 360 / (extra + 1)) % 360, 0.8, 1.6); // Bigger bursts spread much wider across the sky, each in a different colour around the colour wheel
           pollute(c.pollution * 0.5 / extra); // Adds more AQI
         }, 250 + i * 240); // Staggered timing
         setTimeout(() => finish(), 400 + extra * 240 + 900); // Finish after the last burst
@@ -829,28 +934,35 @@ const PRESETS = { // The collection of behaviours
     const el = staged.el, bw = R.width, bh = R.height; // The cracker element and its size
     el.style.transition = 'none'; el.style.transformOrigin = `${o.center[0] / 60 * 100}% ${o.center[1] / 120 * 100}%`; // Move instantly, and rotate around the wheel's centre
     whirr(dur); hiss(dur, 0.25, 2200, 4500); crackle(60, dur, 0.15); // Buzz, hiss and crackle sounds
-    effects.push({ t: 0, rot: 0, x: C0.x, y: C0.y, dir: -Math.PI / 2, turn: 0, boost: 1, update(dt, k) { // Running effect: x,y is the wheel's centre, dir its heading
+    effects.push({ t: 0, rot: 0, x: C0.x, y: C0.y, dir: -Math.PI / 2, turn: 0, boost: 1, kick: 1, update(dt, k) { // Running effect: x,y is the wheel's centre, dir its heading, kick is extra speed gained from bouncing
       this.t += dt; const life = Math.max(0, Math.min(1, (dur - this.t) / (dur * 0.3))); // 1 while burning strongly, fades to 0 in the last 30%
-      this.turn -= dt; if (this.turn <= 0) { this.dir += rand(-2, 2); this.turn = rand(0.1, 0.3); this.boost = Math.random() < 0.25 ? 1.8 : 1; } // Every fraction of a second: swerve randomly, sometimes dash
-      const v = 660 * this.boost * (0.25 + 0.75 * life), vx = Math.cos(this.dir) * v, vy = Math.sin(this.dir) * v; // Speed in pixels per second (slows as it dies)
+      this.turn -= dt; if (this.turn <= 0) { this.dir += rand(-2.4, 2.4); this.turn = rand(0.07, 0.2); this.boost = Math.random() < 0.3 ? 2.2 : 1; } // Every fraction of a second: swerve sharply, and often dash
+      this.kick += (1 - this.kick) * Math.min(1, dt * 2.5); // Extra speed gained from a bounce slowly fades back to normal
+      const v = 1000 * this.boost * this.kick * (0.25 + 0.75 * life), vx = Math.cos(this.dir) * v, vy = Math.sin(this.dir) * v; // Speed in pixels per second (about 50% faster than before; slows as it dies)
       this.x += vx * dt; this.y += vy * dt; // Move
       const m = rad + 12; // Keep the whole wheel on screen
-      if (this.x < m) { this.x = m; this.dir = Math.PI - this.dir; } else if (this.x > W - m) { this.x = W - m; this.dir = Math.PI - this.dir; } // Bounce off the left/right edges
-      if (this.y < m + 80) { this.y = m + 80; this.dir = -this.dir; } else if (this.y > H - m) { this.y = H - m; this.dir = -this.dir; } // Bounce off the top/bottom edges
-      this.rot += (6 + 28 * life) * dt; // Spins twice as fast now, fastest while strong
-      el.style.left = (this.x - o.center[0] / 60 * bw) + 'px'; el.style.top = (this.y - o.center[1] / 120 * bh) + 'px'; // Move the picture so its centre follows the wheel
+      let hit = false; // Did it bounce off an edge this frame?
+      if (this.x < m) { this.x = m; this.dir = Math.PI - this.dir; hit = true; } else if (this.x > W - m) { this.x = W - m; this.dir = Math.PI - this.dir; hit = true; } // Bounce off the left/right edges
+      if (this.y < m + 80) { this.y = m + 80; this.dir = -this.dir; hit = true; } else if (this.y > H - m) { this.y = H - m; this.dir = -this.dir; hit = true; } // Bounce off the top/bottom edges
+      if (hit) { // Every bounce makes it even bouncier
+        this.kick = 1.7; this.dir += rand(-0.5, 0.5); thump(0.3); // Speed boost, a slightly random new direction and a "boing" sound
+        for (let q = 0; q < 16; q++) { const a = Math.random() * 6.283, sp = rand(2, 7); spark(this.x, this.y, Math.cos(a) * sp, Math.sin(a) * sp, { life: rand(0.3, 0.7), h: pick(colors), g: 0.1, d: 0.95, s: 2.2 }); } // A little burst of sparks at the bounce
+      } // End of bounce
+      const cy = this.y - Math.abs(Math.sin(this.t * 11)) * 55 * (0.3 + 0.7 * life); // Extra up-and-down hopping, like a bouncing ball
+      this.rot += (6 + 28 * life) * dt; // Spins fast, fastest while strong
+      el.style.left = (this.x - o.center[0] / 60 * bw) + 'px'; el.style.top = (cy - o.center[1] / 120 * bh) + 'px'; // Move the picture so its centre follows the wheel (including the hop)
       el.style.transform = `rotate(${this.rot}rad)`; // Rotate the picture (flat spin, no flipping)
       for (let j = 0; j < 6; j++) { // Six spark jets around the rim
         const a = this.rot + j * 1.047, n = Math.ceil(3 * life + Math.random()); // Angle of this jet; more sparks per frame for extra intensity
-        for (let q = 0; q < n; q++) spark(this.x + Math.cos(a) * rad * 0.9, this.y + Math.sin(a) * rad * 0.9, // Start on the rim
+        for (let q = 0; q < n; q++) spark(this.x + Math.cos(a) * rad * 0.9, cy + Math.sin(a) * rad * 0.9, // Start on the rim
           -Math.sin(a) * (5 + 4 * life) + Math.cos(a) * 1.5 + vx / 60 * 0.5 + rand(-1, 1), Math.cos(a) * (5 + 4 * life) + Math.sin(a) * 1.5 + vy / 60 * 0.5 + rand(-1, 1), // Fly off sideways (tangent), a bit outward, plus the wheel's own motion
           { life: rand(0.5, 1.1), h: pick(colors), l: 62, g: 0.1, d: 0.965, s: rand(1.8, 3), tw: true }); // Bigger, longer-lived coloured sparks
       } // End of jets
-      glow(this.x, this.y, 230, pick(colors), 0.7 * life, 6); // Big coloured light around the wheel
-      if (Math.random() < 0.2 * k) smoke(this.x, this.y, 1, 0.8); // Smoke trail
+      glow(this.x, cy, 230, pick(colors), 0.7 * life, 6); // Big coloured light around the wheel
+      if (Math.random() < 0.2 * k) smoke(this.x, cy, 1, 0.8); // Smoke trail
       pollute(c.pollution / dur * dt); // Slowly add AQI
       if (this.t >= dur) { // Burnt out
-        bang(0.8, 0.8); shell(this.x, this.y, 'peony', Math.floor(rand(0, 360)), 0.7, 1.3); finish(); return false; // Final pop with a small firework, then finish
+        bang(0.8, 0.8); shell(this.x, cy, 'peony', Math.floor(rand(0, 360)), 0.7, 1.3); finish(); return false; // Final pop with a small firework, then finish
       } // End of ending
       return true; // Keep going
     } }); // End of effect
@@ -920,7 +1032,7 @@ const PRESETS = { // The collection of behaviours
       wait -= dt; // Count down to next shot
       if (shot < balls && wait <= 0) { // Time to fire a ball
         const hue = colors[shot % colors.length]; shot++; wait = rand(0.16, 0.3); // Choose its colour and schedule the next (much faster now)
-        flying.push({ x: N.x, y: N.y, vx: rand(-1.2, 1.2), vy: -rand(9, 12), hue, top: H * rand(0.15, 0.4) }); // New flying ball
+        flying.push({ x: N.x, y: N.y, vx: rand(-3.6, 3.6), vy: -rand(9, 12), hue, top: H * rand(0.18, 0.45) }); // New flying ball (it flies sideways much more, so the balls fan out wide)
         thump(0.5); crackle(6, 0.2, 0.3); glow(N.x, N.y, 90, hue, 0.9, 4); // Launch sound and light
         for (let i = 0; i < 12; i++) spark(N.x, N.y, rand(-2, 2), -rand(1, 5), { life: rand(0.2, 0.5), h: hue, g: 0.1, s: 1.6 }); // Muzzle sparks
       } // End of firing
@@ -929,13 +1041,69 @@ const PRESETS = { // The collection of behaviours
         spark(b.x, b.y, rand(-0.4, 0.4), rand(0.5, 1.5), { life: rand(0.3, 0.7), h: b.hue, g: 0.03, s: 3 }); // Thicker coloured tail
         glow(b.x, b.y, 50, b.hue, 0.5, 5); // Glow around the ball
         if (b.y <= b.top || b.vy > -2.5) { // Reached its top: pop into a small firework
-          shell(b.x, b.y, pick(['peony', 'ring', 'crossette']), b.hue, 0.8, 1.5); pollute(c.pollution / balls); flying.splice(i, 1); // Burst, add AQI, remove ball
+          shell(b.x, b.y, pick(['peony', 'ring', 'crossette']), b.hue, 0.8, 2); pollute(c.pollution / balls); flying.splice(i, 1); // Burst, add AQI, remove ball
         } // End of pop
       } // End of ball loop
       if (shot >= balls && flying.length === 0) { setTimeout(() => finish(), 900); return false; } // All shot and burst: finish
       return true; // Keep going
     } }); // End of effect
-  } // End of candle
+  }, // End of candle
+
+  pyro(c) { // Pyro Stick: once lit, your pointer becomes a glowing stick that writes / draws in the air for a few seconds
+    const s = staged, dur = c.opts.dur ?? 6; // The picked stick, and how long it burns
+    s.el.classList.add('gone'); setTimeout(() => s.el.remove(), 600); // The stick is "picked up": fade the picture away
+    staged = null; document.documentElement.style.removeProperty('--hintb'); // No cracker is waiting any more
+    const P = pyroState = { btn: s.btn, t: 0, started: false, dur, strokes: [], cur: null, hue: rand(0, 360), fade: 0, shown: '' }; // Timer, drawn lines, current line, starting colour, fade-out timer
+    setHint(ptr.touch ? 'Drag your finger to write or draw ✍️ It burns for 6 seconds once you start!' : 'Hold the mouse button and move to write or draw ✍️ It burns for 6 seconds once you start!'); // Tell the player how it works
+    effects.push({ // The running effect
+      update(dt) { // Runs every frame
+        const T = tip(); // Where the glowing tip is
+        if (!P.started && ptr.down) { // The first press starts the 6-second timer
+          P.started = true; hiss(dur, 0.3, 2500, 5200); // Start burning with a fizzing sound
+        } // End of start
+        if (P.started && P.t < dur) { // The stick is burning
+          P.t += dt; // Time passes
+          const left = Math.max(0, dur - P.t), msg = `✍️ ${left.toFixed(1)}s left`; // Seconds remaining
+          if (msg !== P.shown) { P.shown = msg; setHint(msg); } // Show the countdown (only when the text changes)
+          if (ptr.down) { // Pressed: add to the line being drawn
+            if (!P.cur) { P.cur = []; P.strokes.push(P.cur); } // Start a new line (this allows lifting the "pen" between letters)
+            const last = P.cur[P.cur.length - 1]; // The previous point
+            if (!last || Math.hypot(T.x - last.x, T.y - last.y) > 1.5) P.cur.push({ x: T.x, y: T.y, h: (P.hue + P.t * 70) % 360 }); // Add a point (its colour slowly changes along the line)
+          } else P.cur = null; // Not pressed: the next press begins a new line
+          for (let i = 0; i < 6; i++) { const a = Math.random() * 6.283, v = rand(1, 5); // Lots of sparks fly off the tip
+            spark(T.x, T.y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.25, 0.7), h: (P.hue + P.t * 70 + rand(-30, 30)) % 360, l: 70, g: 0.08, d: 0.95, s: 1.6, tw: true }); } // Coloured sparks
+          glow(T.x, T.y, 90, (P.hue + P.t * 70) % 360, 0.6, 6); // Coloured glow around the tip
+          pollute(c.pollution / dur * dt); // A little pollution while it burns
+          if (P.t >= dur) { // Burnt out
+            sparklerOn = false; document.body.classList.remove('sparkler'); stopSparklerSound(); P.cur = null; ptr.down = false; // The stick is finished: normal cursor again
+            setHint('The stick burnt out! 🎇'); // Tell the player
+            P.snap = P.strokes.length > 0; // If something was drawn, take the screenshot just before the drawing starts to fade
+          } // End of burn-out
+        } else if (P.started) { // The stick is out: the drawing fades away
+          P.fade += dt; // Fade timer
+          if (P.fade >= 1.5) { // Fully faded
+            P.btn.classList.remove('picked'); bursts++; praise(); setHint('Beautiful! Pick another one 🎆'); pyroState = null; return false; // Give the tray back and finish
+          } // End of fade
+        } // End of burning / fading
+        return true; // Keep going
+      }, // End of update
+      draw(g) { // Paints the lines on the fireworks canvas
+        const a = P.fade > 0 ? 1 - P.fade / 1.5 : 1; // Opacity: full while burning, fading after
+        g.save(); g.globalCompositeOperation = 'lighter'; g.lineCap = 'round'; g.lineJoin = 'round'; // Glowing, rounded lines
+        for (const st of P.strokes) { // Every line drawn so far
+          if (st.length === 1) { g.fillStyle = `hsla(${st[0].h},100%,75%,${a})`; g.beginPath(); g.arc(st[0].x, st[0].y, 3, 0, 6.283); g.fill(); continue; } // A single tap is a dot
+          for (let i = 1; i < st.length; i++) { // Draw the line piece by piece (so its colour can change)
+            g.strokeStyle = `hsla(${st[i].h},100%,55%,${0.22 * a})`; g.lineWidth = 13; // Wide soft glow
+            g.beginPath(); g.moveTo(st[i - 1].x, st[i - 1].y); g.lineTo(st[i].x, st[i].y); g.stroke(); // The glow piece
+            g.strokeStyle = `hsla(${st[i].h},100%,88%,${0.95 * a})`; g.lineWidth = 3.5; // Bright thin core
+            g.beginPath(); g.moveTo(st[i - 1].x, st[i - 1].y); g.lineTo(st[i].x, st[i].y); g.stroke(); // The core piece
+          } // End of pieces
+        } // End of lines
+        g.restore(); // Restore drawing state
+        if (P.snap) { P.snap = false; takeSnap(); flashScreen(0.12); } // The drawing is fully bright right now: take the screenshot (with a gentle camera flash)
+      } // End of draw
+    }); // End of effect
+  } // End of pyro
 }; // End of presets
 
 function launch(c) { // Starts the main effect of a cracker once its fuse has burnt
@@ -1072,6 +1240,29 @@ function frame(now) { // One frame of animation
 
 window.addEventListener('resize', resize); // Re-layout when the window changes size
 resize(); // Initial layout
+/* ---------- Sharing (X, LinkedIn, Instagram) ---------- */
+const SHARE_URL = 'https://dhruvb-cloud.github.io/Digital-Diwali/'; // The public address people are sent to (change it when you move to your own domain)
+function shareText() { // Builds the message, using the player's own numbers when they have lit crackers
+  if (bursts > 0) return `I celebrated Diwali with virtual crackers on Digital Diwali 🪔 — AQI +${Math.round(Math.max(added, 1))} and up to ${Math.round(maxDb)} dB of noise, but zero real smoke! Try a pollution-free Diwali 🌿`; // Personal message
+  return 'Celebrate a pollution-free Diwali with virtual crackers on Digital Diwali 🪔🎆 — no smoke, no noise, no scared pets!'; // Generic message if nothing was lit yet
+} // End of shareText
+function openShare(url) { window.open(url, '_blank', 'noopener,noreferrer'); } // Opens a share page in a new tab, safely
+$('#shX').addEventListener('click', e => { // X (Twitter) button
+  e.stopPropagation(); // Do not let the click reach the game underneath
+  openShare('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText()) + '&url=' + encodeURIComponent(SHARE_URL) + '&hashtags=Diwali,DigitalDiwali,PollutionFreeDiwali'); // X's official "compose post" link
+}); // End of click handler
+$('#shIn').addEventListener('click', e => { // LinkedIn button
+  e.stopPropagation(); // Do not let the click reach the game underneath
+  openShare('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(SHARE_URL)); // LinkedIn's official share link (it only accepts the link, not text)
+}); // End of click handler
+$('#shIg').addEventListener('click', async e => { // Instagram button
+  e.stopPropagation(); // Do not let the click reach the game underneath
+  const text = shareText(), data = { title: 'Digital Diwali', text, url: SHARE_URL}; // What we want to share
+  if (navigator.share) { try { await navigator.share(data); return; } catch (err) { if (err && err.name === 'AbortError') return; } } // On phones: open the phone's share sheet, where Instagram is one of the choices
+  try { await navigator.clipboard.writeText(text + ' ' + SHARE_URL); setHint('Link copied 📋 Paste it in your Instagram story, post or message'); } // On computers: Instagram has no web share link, so copy the text and link instead
+  catch (err) { setHint('Copy this link to share on Instagram: ' + SHARE_URL); } // If copying is blocked, show the link instead
+  openShare('https://www.instagram.com/'); // Then open Instagram so the player can paste it
+}); // End of click handler
 $('#clear').addEventListener('click', e => { // When 'Clear the air' is pressed
   e.stopPropagation(); ensureAudio(); clearing = true; hiss(1.8, 0.25, 300, 1400); setHint('Fresh air is coming… 🌬️'); // Start fast clearing with a gentle breeze sound
 }); // End of click handler
