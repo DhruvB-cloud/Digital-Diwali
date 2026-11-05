@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Diwali Dhamaka</title>
+<meta name="description" content="Celebrate Diwali digitally: light firecrackers with a sparkler under a starry sky, and watch the AQI change.">
+<style>
+  :root{
+    --cw: 46px;              /* firecracker width in the tray */
+    --gold:#ffc857;
+    --aqi-color:#5fd068;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:#000;color:#f4ecd8;overflow:hidden;
+    font-family:ui-rounded,"Trebuchet MS",system-ui,-apple-system,"Segoe UI",sans-serif;
+    touch-action:none;user-select:none;-webkit-user-select:none}
+  body.sparkler, body.sparkler *{cursor:none !important}
+
+  #world{position:fixed;inset:0;overflow:hidden}
+  #world.shake{animation:shake .42s cubic-bezier(.36,.07,.19,.97)}
+  #world.tick{animation:tick .12s linear}
+  @keyframes shake{
+    10%,90%{transform:translate(-2px,1px)} 20%,80%{transform:translate(4px,-3px)}
+    30%,50%,70%{transform:translate(-7px,4px)} 40%,60%{transform:translate(7px,-4px)}
+  }
+  @keyframes tick{50%{transform:translate(2px,-2px)}}
+
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #sky{transform:scale(1.06);transition:filter 1.4s ease;will-change:filter}
+  #fx{pointer-events:none;z-index:20}
+  #haze{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;pointer-events:none;
+    background:
+      radial-gradient(ellipse 120% 80% at 50% 105%, rgba(176,128,78,.95), rgba(96,74,58,.65) 55%, rgba(40,34,32,0) 100%),
+      rgba(60,52,48,.55)}
+  #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30}
+
+  /* ---------- HUD ---------- */
+  .brand{position:fixed;top:14px;left:16px;z-index:40;font-weight:700;letter-spacing:.04em;
+    font-size:clamp(15px,2.4vw,20px);color:var(--gold);text-shadow:0 0 14px rgba(255,200,87,.45);pointer-events:none}
+  #aqi{position:fixed;top:12px;right:12px;z-index:40;width:min(215px,52vw);padding:10px 13px 11px;
+    border-radius:14px;background:rgba(18,16,22,.62);border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none}
+  #aqi .row span:first-child{white-space:nowrap}
+  #aqi .row{display:flex;justify-content:space-between;gap:8px;font-size:11px;opacity:.75;letter-spacing:.05em;text-transform:uppercase}
+  #aqi #loc{text-transform:none;letter-spacing:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #aqi .big{display:flex;align-items:baseline;gap:10px;margin:2px 0 6px}
+  #aqiNum{font-size:clamp(32px,6vw,42px);font-weight:800;color:var(--aqi-color);line-height:1;font-variant-numeric:tabular-nums;transition:color .6s}
+  #aqiCat{font-size:12px;font-weight:600;color:var(--aqi-color);transition:color .6s}
+  .bar{height:5px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--aqi-color);border-radius:5px;transition:background .6s}
+  .meta{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;opacity:.8}
+
+  #hint{position:fixed;left:50%;top:56px;transform:translateX(-50%);z-index:40;max-width:88vw;text-align:center;
+    padding:8px 16px;border-radius:999px;background:rgba(18,16,22,.55);border:1px solid rgba(255,200,87,.25);
+    font-size:clamp(12px,2.2vw,15px);color:#ffe9b8;pointer-events:none;transition:opacity .4s;white-space:nowrap}
+  #hint.off{opacity:0}
+  @media (max-width:560px){ #hint{top:auto;bottom:calc(var(--trayh,130px) + 8px);white-space:normal} }
+
+  /* ---------- Tray ---------- */
+  #tray{position:absolute;left:0;right:0;bottom:0;z-index:15;display:flex;justify-content:center;align-items:flex-end;
+    gap:clamp(8px,3vw,34px);padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,0))}
+  .cracker{appearance:none;background:none;border:0;padding:0;color:inherit;font:inherit;display:flex;flex-direction:column;
+    align-items:center;gap:4px;cursor:pointer;transition:transform .2s, filter .2s}
+  .cracker svg{width:var(--cw);height:calc(var(--cw)*2);display:block;filter:drop-shadow(0 0 6px rgba(255,170,60,.18))}
+  .cracker span{font-size:11px;opacity:.8;letter-spacing:.03em}
+  .cracker:hover{transform:translateY(-8px);filter:brightness(1.2)}
+  .cracker.picked{opacity:.0;pointer-events:none}
+  .cracker:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:6px}
+  @media (min-width:700px){ :root{--cw:58px} .cracker span{font-size:12px} }
+
+  /* ---------- Staged cracker ---------- */
+  .staged{position:absolute;z-index:10;transition:left .65s cubic-bezier(.2,.9,.25,1),top .65s cubic-bezier(.2,.9,.25,1),
+    width .65s cubic-bezier(.2,.9,.25,1),height .65s cubic-bezier(.2,.9,.25,1),opacity .5s;pointer-events:none}
+  .staged svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 14px rgba(255,170,60,.3))}
+  .staged.gone{opacity:0}
+  .staged.spinning svg{animation:spin .5s linear infinite}
+  @keyframes spin{0%{transform:perspective(300px) rotateY(0)}100%{transform:perspective(300px) rotateY(360deg)}}
+  .staged.lit svg{animation:jit .08s linear infinite}
+  @keyframes jit{50%{transform:translateX(1px)}}
+</style>
+</head>
+<body>
+<div id="world">
+  <canvas id="sky"></canvas>
+  <div id="haze"></div>
+  <div id="tray"></div>
+  <canvas id="fx"></canvas>
+</div>
+<div id="flash"></div>
+
+<div class="brand">🪔 Diwali Dhamaka</div>
+
+<div id="aqi" aria-live="polite">
+  <div class="row"><span>AQI · US</span><span id="loc">Locating…</span></div>
+  <div class="big"><span id="aqiNum">--</span><span id="aqiCat">&nbsp;</span></div>
+  <div class="bar"><i id="aqiBar"></i></div>
+  <div class="meta"><span id="delta">+0 from your crackers</span><span id="count">0 burst</span></div>
+</div>
+
+<div id="hint">Pick a firecracker from below ✨</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ======================= helpers ======================= */
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[(Math.random() * a.length) | 0];
+const world = $('#world'), skyC = $('#sky'), fxC = $('#fx'), haze = $('#haze');
+const sky = skyC.getContext('2d'), fx = fxC.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+
+/* ======================= audio ======================= */
+let ac = null, master = null, noiseBuf = null;
+function ensureAudio() {
+  if (!ac) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ac = new AC();
+    master = ac.createGain(); master.gain.value = 0.85;
+    const comp = ac.createDynamicsCompressor();
+    master.connect(comp); comp.connect(ac.destination);
+    noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  if (ac.state === 'suspended') ac.resume();
+  return true;
+}
+function noiseSrc() { const s = ac.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s; }
+function bang(vol = 1, len = 1) {
+  if (!ac) return; const t = ac.currentTime;
+  const n = noiseSrc(), f = ac.createBiquadFilter(), g = ac.createGain();
+  f.type = 'lowpass';
+  f.frequency.setValueAtTime(7000, t); f.frequency.exponentialRampToValueAtTime(180, t + 0.55 * len);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.7 * len);
+  n.connect(f).connect(g).connect(master); n.start(t, Math.random()); n.stop(t + 0.8 * len + 0.1);
+  const o = ac.createOscillator(), og = ac.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(34, t + 0.45 * len);
+  og.gain.setValueAtTime(vol * 0.95, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.55 * len);
+  o.connect(og).connect(master); o.start(t); o.stop(t + 0.6 * len);
+}
+function tickSound(t, v) {
+  const n = noiseSrc(), f = ac.createBiquadFilter(), g = ac.createGain();
+  f.type = 'highpass'; f.frequency.value = 1500 + Math.random() * 3500;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+  n.connect(f).connect(g).connect(master); n.start(t, Math.random()); n.stop(t + 0.07);
+}
+function crackle(count, dur, vol = 0.5) {
+  if (!ac) return;
+  for (let i = 0; i < count; i++) tickSound(ac.currentTime + Math.random() * dur, vol * (0.25 + Math.random() * 0.75));
+}
+function hiss(dur, vol, f0, f1, type = 'bandpass') {
+  if (!ac) return; const t = ac.currentTime;
+  const n = noiseSrc(), f = ac.createBiquadFilter(), g = ac.createGain();
+  f.type = type; f.Q.value = 0.8;
+  f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + Math.min(0.15, dur / 3));
+  g.gain.setValueAtTime(vol, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  n.connect(f).connect(g).connect(master); n.start(t, Math.random()); n.stop(t + dur + 0.1);
+}
+function whirr(dur) {
+  if (!ac) return; const t = ac.currentTime;
+  const o = ac.createOscillator(), lp = ac.createBiquadFilter(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(300, t + dur);
+  lp.type = 'lowpass'; lp.frequency.value = 1100;
+  lfo.frequency.value = 16; lg.gain.value = 0.03; lfo.connect(lg).connect(g.gain);
+  g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  o.connect(lp).connect(g).connect(master); o.start(t); lfo.start(t); o.stop(t + dur); lfo.stop(t + dur);
+}
+
+/* ======================= canvas sizing & stars ======================= */
+let stars = [], shooting = null;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  for (const c of [skyC, fxC]) { c.width = W * DPR; c.height = H * DPR; }
+  sky.setTransform(DPR, 0, 0, DPR, 0, 0); fx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const count = Math.min(700, Math.floor(W * H / 2400));
+  stars = Array.from({ length: count }, () => ({
+    x: Math.random() * W, y: Math.random() * H * 0.92,
+    r: Math.random() < 0.08 ? rand(1.4, 2.1) : rand(0.4, 1.3),
+    ph: Math.random() * 6.28, sp: rand(0.6, 2.4),
+    h: pick([0, 0, 0, 45, 210, 20]), b: rand(0.45, 1)
+  }));
+  document.documentElement.style.setProperty('--trayh', ($('#tray').offsetHeight || 130) + 'px');
+  if (staged && staged.ready) placeStaged(false);
+}
+function drawSky(t, dt) {
+  sky.clearRect(0, 0, W, H);
+  for (const s of stars) {
+    const tw = 0.55 + 0.45 * Math.sin(t * s.sp + s.ph);
+    sky.fillStyle = s.h ? `hsla(${s.h},80%,85%,${s.b * tw})` : `rgba(255,255,255,${s.b * tw})`;
+    sky.beginPath(); sky.arc(s.x, s.y, s.r, 0, 6.283); sky.fill();
+  }
+  if (!shooting && Math.random() < dt * 0.12) {
+    shooting = { x: rand(W * 0.1, W * 0.9), y: rand(0, H * 0.3), vx: rand(380, 560) * pick([-1, 1]), vy: rand(130, 240), life: 0.9 };
+  }
+  if (shooting) {
+    const s = shooting; s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
+    const g = sky.createLinearGradient(s.x, s.y, s.x - s.vx * 0.18, s.y - s.vy * 0.18);
+    g.addColorStop(0, `rgba(255,255,255,${Math.max(0, s.life)})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+    sky.strokeStyle = g; sky.lineWidth = 1.6;
+    sky.beginPath(); sky.moveTo(s.x, s.y); sky.lineTo(s.x - s.vx * 0.18, s.y - s.vy * 0.18); sky.stroke();
+    if (s.life <= 0) shooting = null;
+  }
+}
+
+/* ======================= firecracker artwork ======================= */
+const ART = {
+  anar: { name: 'Anar', svg: `
+    <polygon points="14,118 46,118 42,52 18,52" fill="#d6402b"/>
+    <polygon points="17.3,64 42.7,64 43.2,72 16.8,72" fill="#f4c542"/>
+    <polygon points="15.3,96 44.7,96 45.2,104 14.8,104" fill="#f4c542"/>
+    <circle cx="30" cy="85" r="8" fill="#f4c542"/><circle cx="30" cy="85" r="4.5" fill="#d6402b"/>
+    <ellipse cx="30" cy="52" rx="12" ry="4" fill="#2b1a12"/>
+    <path d="M30 52 q4 -14 -2 -24" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle class="fuse-tip" cx="28" cy="28" r="3" fill="none"/>` },
+  rocket: { name: 'Rocket', svg: `
+    <rect x="28.5" y="74" width="3" height="44" fill="#c8a86a"/>
+    <polygon points="20,30 40,30 30,6" fill="#d6402b"/>
+    <rect x="20" y="30" width="20" height="46" rx="2" fill="#e9b424"/>
+    <rect x="20" y="44" width="20" height="7" fill="#d6402b"/><rect x="20" y="60" width="20" height="4" fill="#d6402b"/>
+    <polygon points="20,66 12,80 20,76" fill="#d6402b"/><polygon points="40,66 48,80 40,76" fill="#d6402b"/>
+    <path d="M34 76 q10 2 12 12" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle class="fuse-tip" cx="46" cy="88" r="3" fill="none"/>` },
+  bomb: { name: 'Atom Bomb', svg: `
+    <rect x="13" y="44" width="34" height="62" rx="6" fill="#c0392b"/>
+    <rect x="13" y="44" width="34" height="8" rx="3" fill="#f1c40f"/><rect x="13" y="98" width="34" height="8" rx="3" fill="#f1c40f"/>
+    <rect x="18" y="58" width="24" height="30" rx="2" fill="#fff1c9"/>
+    <text x="30" y="70" font-size="7.5" font-weight="800" text-anchor="middle" fill="#8e1b10" font-family="Arial,sans-serif">ATOM</text>
+    <text x="30" y="80" font-size="7.5" font-weight="800" text-anchor="middle" fill="#8e1b10" font-family="Arial,sans-serif">BOMB</text>
+    <path d="M30 44 q-6 -10 2 -18" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle class="fuse-tip" cx="32" cy="26" r="3" fill="none"/>` },
+  chakri: { name: 'Chakri', svg: `
+    <ellipse cx="30" cy="104" rx="25" ry="11" fill="#3a2a1a"/>
+    <ellipse cx="30" cy="104" rx="20" ry="8.5" fill="none" stroke="#d6402b" stroke-width="3"/>
+    <ellipse cx="30" cy="104" rx="14" ry="6" fill="none" stroke="#f4c542" stroke-width="3"/>
+    <ellipse cx="30" cy="104" rx="8" ry="3.5" fill="none" stroke="#d6402b" stroke-width="3"/>
+    <path d="M30 100 q8 -14 -2 -22 q-6 -8 2 -16" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle class="fuse-tip" cx="30" cy="62" r="3" fill="none"/>` },
+  ladi: { name: 'Ladi', svg: [0, 1, 2, 3, 4, 5].map(i => `
+    <rect x="22" y="${34 + i * 14}" width="16" height="12" rx="2.5" fill="#cf3a2b"/>
+    <rect x="22" y="${38 + i * 14}" width="16" height="3" fill="#f4c542"/>`).join('') + `
+    <line x1="30" y1="34" x2="30" y2="118" stroke="#f0e6cc" stroke-width="1" opacity=".7"/>
+    <path d="M30 34 q-5 -8 1 -14" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle class="fuse-tip" cx="31" cy="20" r="3" fill="none"/>` }
+};
+const svgFor = type => `<svg viewBox="0 0 60 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${ART[type].svg}</svg>`;
+
+const tray = $('#tray');
+for (const type of Object.keys(ART)) {
+  const b = document.createElement('button');
+  b.className = 'cracker'; b.dataset.type = type; b.setAttribute('aria-label', 'Select ' + ART[type].name);
+  b.innerHTML = svgFor(type) + `<span>${ART[type].name}</span>`;
+  b.addEventListener('click', () => selectCracker(b));
+  tray.appendChild(b);
+}
+
+/* ======================= state ======================= */
+let staged = null;           // { type, el, btn, ready, lit }
+let sparklerOn = false;
+const ptr = { x: -999, y: -999, seen: false };
+let bursts = 0, added = 0, baseAQI = null, shown = 0;
+
+window.addEventListener('pointermove', e => { ptr.x = e.clientX; ptr.y = e.clientY; ptr.seen = true; });
+window.addEventListener('pointerdown', e => { ptr.x = e.clientX; ptr.y = e.clientY; ptr.seen = true; });
+
+function setHint(msg) {
+  const h = $('#hint');
+  if (!msg) { h.classList.add('off'); return; }
+  h.textContent = msg; h.classList.remove('off');
+}
+
+/* ======================= staging a cracker ======================= */
+function stagedTarget() {
+  const trayH = $('#tray').offsetHeight;
+  let w = Math.min(96, W * 0.26);
+  const maxH = H * 0.46; if (w * 2 > maxH) w = maxH / 2;
+  const h = w * 2;
+  return { w, h, left: W / 2 - w / 2, top: H - trayH - 6 - h };
+}
+function placeStaged(animate) {
+  const t = stagedTarget(), s = staged.el.style;
+  if (!animate) { s.transition = 'none'; }
+  s.left = t.left + 'px'; s.top = t.top + 'px'; s.width = t.w + 'px'; s.height = t.h + 'px';
+  if (!animate) { void staged.el.offsetWidth; s.transition = ''; }
+}
+function selectCracker(btn) {
+  if (staged && staged.lit) return;
+  ensureAudio();
+  if (staged) dropStaged();
+  const r = btn.querySelector('svg').getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'staged'; el.innerHTML = svgFor(btn.dataset.type);
+  Object.assign(el.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+  world.appendChild(el);
+  btn.classList.add('picked');
+  staged = { type: btn.dataset.type, el, btn, ready: false, lit: false };
+  const me = staged;
+  requestAnimationFrame(() => requestAnimationFrame(() => placeStaged(true)));
+  setTimeout(() => { me.ready = true; }, 700);
+  sparklerOn = true; document.body.classList.add('sparkler');
+  if (!ptr.seen) { ptr.x = W * 0.62; ptr.y = H * 0.45; }
+  setHint('Touch the sparkler tip to the fuse to light it 🔥');
+}
+function dropStaged() {
+  staged.el.remove(); staged.btn.classList.remove('picked'); staged = null;
+}
+function finish(msg = 'Boom! Pick another one 🎆') {
+  const s = staged; if (!s) return;
+  s.el.classList.add('gone'); setTimeout(() => s.el.remove(), 600);
+  s.btn.classList.remove('picked');
+  staged = null; sparklerOn = false; document.body.classList.remove('sparkler');
+  bursts++; setHint(msg);
+}
+const fuseScreen = () => {
+  const r = staged.el.querySelector('.fuse-tip').getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+};
+const svgPt = (R, x, y) => ({ x: R.left + x / 60 * R.width, y: R.top + y / 120 * R.height });
+
+/* ======================= particles & lights ======================= */
+const parts = [], lights = [], effects = [];
+const MAX_PARTS = 3200;
+function spark(x, y, vx, vy, o = {}) {
+  if (parts.length > MAX_PARTS) return;
+  const life = o.life ?? 1;
+  parts.push({ x, y, px: x, py: y, vx, vy, life, max: life, h: o.h ?? 40, l: o.l ?? 60, s: o.s ?? 1.6,
+    g: o.g ?? 0.06, d: o.d ?? 0.985, tw: o.tw ?? false, split: o.split ?? 0, kind: o.kind ?? 'spark' });
+}
+function smoke(x, y, n = 1, big = 1) {
+  for (let i = 0; i < n; i++) spark(x + rand(-8, 8), y + rand(-8, 8), rand(-0.6, 0.6), rand(-1.1, -0.2),
+    { kind: 'smoke', life: rand(2.5, 4.5), s: rand(14, 26) * big, g: -0.004, d: 0.99 });
+}
+function glow(x, y, r, h, a = 1, decay = 2.4) { lights.push({ x, y, r, h, a, decay }); }
+function ring(x, y, v = 900) { lights.push({ x, y, r: 8, vr: v, a: 1, decay: 2.2, ring: true }); }
+function flashScreen(a) {
+  const f = $('#flash'); f.style.transition = 'none'; f.style.opacity = a; void f.offsetWidth;
+  f.style.transition = 'opacity .55s ease-out'; f.style.opacity = 0;
+}
+function shake(big = true) {
+  const cls = big ? 'shake' : 'tick';
+  world.classList.remove('shake', 'tick'); void world.offsetWidth; world.classList.add(cls);
+}
+function pollute(n) { added = Math.min(400, added + n); }
+
+function updateParts(dt) {
+  const k = dt * 60;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p.life -= dt;
+    if (p.life <= 0) { parts[i] = parts[parts.length - 1]; parts.pop(); continue; }
+    if (p.split && p.life < p.max * 0.55) {
+      for (let j = 0; j < 9; j++) { const a = Math.random() * 6.283, v = rand(1, 3.2);
+        spark(p.x, p.y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.6, 1), h: p.h, g: 0.05, d: 0.97, tw: true }); }
+      p.life = 0; continue;
+    }
+    const dk = Math.pow(p.d, k);
+    p.px = p.x; p.py = p.y;
+    p.vx *= dk; p.vy = p.vy * dk + p.g * k;
+    p.x += p.vx * k; p.y += p.vy * k;
+  }
+  for (let i = lights.length - 1; i >= 0; i--) {
+    const l = lights[i]; l.a -= l.decay * dt; if (l.ring) l.r += l.vr * dt, l.vr *= Math.pow(0.93, k);
+    if (l.a <= 0) lights.splice(i, 1);
+  }
+}
+function drawParts() {
+  fx.globalCompositeOperation = 'source-over';
+  for (const p of parts) {
+    if (p.kind !== 'smoke') continue;
+    const r = p.life / p.max;
+    fx.fillStyle = `rgba(150,140,130,${(r * 0.16).toFixed(3)})`;
+    fx.beginPath(); fx.arc(p.x, p.y, p.s * (1 + (1 - r) * 2.2), 0, 6.283); fx.fill();
+  }
+  fx.globalCompositeOperation = 'lighter';
+  fx.lineCap = 'round';
+  for (const l of lights) {
+    if (l.ring) {
+      fx.strokeStyle = `rgba(255,225,170,${Math.max(0, l.a * 0.8)})`; fx.lineWidth = 5 * l.a + 1;
+      fx.beginPath(); fx.arc(l.x, l.y, l.r, 0, 6.283); fx.stroke();
+    } else {
+      const g = fx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
+      g.addColorStop(0, `hsla(${l.h},100%,70%,${Math.min(1, l.a) * 0.55})`);
+      g.addColorStop(1, `hsla(${l.h},100%,50%,0)`);
+      fx.fillStyle = g; fx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+    }
+  }
+  for (const p of parts) {
+    if (p.kind === 'smoke') continue;
+    const r = p.life / p.max;
+    let a = Math.min(1, r * 1.6);
+    if (p.tw && Math.random() < 0.3) a *= 0.25;
+    fx.strokeStyle = `hsla(${p.h},100%,${p.l + (1 - r) * 0 + r * 25}%,${a.toFixed(3)})`;
+    fx.lineWidth = p.s * (0.5 + r * 0.7);
+    fx.beginPath(); fx.moveTo(p.px, p.py); fx.lineTo(p.x + 0.01, p.y); fx.stroke();
+  }
+  fx.globalCompositeOperation = 'source-over';
+}
+
+/* ======================= firework shells ======================= */
+function shell(x, y, style, hue, loud = 1) {
+  const n = style === 'ring' ? 80 : 130;
+  const hue2 = (hue + 150 + rand(0, 60)) % 360;
+  if (style === 'peony') {
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = 1 + Math.sqrt(Math.random()) * 5.2;
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(1.1, 1.9), h: v < 2.6 ? hue2 : hue, g: 0.05, d: 0.972, tw: Math.random() < 0.3 }); }
+  } else if (style === 'ring') {
+    const tilt = rand(0.35, 1);
+    for (let i = 0; i < n; i++) { const a = i / n * 6.283;
+      spark(x, y, Math.cos(a) * 4.6, Math.sin(a) * 4.6 * tilt, { life: rand(1.3, 1.7), h: hue, g: 0.04, d: 0.975 }); }
+    for (let i = 0; i < 40; i++) { const a = Math.random() * 6.283, v = rand(0.5, 2);
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.8, 1.2), h: hue2, g: 0.05, d: 0.97 }); }
+  } else if (style === 'willow') {
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = 1 + Math.sqrt(Math.random()) * 4;
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(2.4, 3.4), h: 42, l: 62, g: 0.035, d: 0.982, s: 1.3, tw: true }); }
+  } else { // crossette
+    for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283 + rand(-0.1, 0.1), v = rand(3, 4.2);
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(1.2, 1.5), h: hue, g: 0.05, d: 0.97, s: 2.2, split: 1 }); }
+  }
+  glow(x, y, 240, hue, 1); flashScreen(0.1 * loud);
+  bang(0.7 * loud, 1.1); crackle(26, 1.1, 0.35 * loud);
+  smoke(x, y, 5, 1.2);
+}
+const SHELLS = ['peony', 'ring', 'willow', 'crossette', 'peony'];
+
+/* ======================= cracker behaviours ======================= */
+const POLLUTION = { anar: 14, rocket: 18, bomb: 26, chakri: 9, ladi: 20 };
+
+function igniteAnimation(onDone) {
+  const s = staged; s.lit = true; s.el.classList.add('lit');
+  setHint(null);
+  hiss(0.7, 0.35, 3500, 7000, 'highpass');
+  effects.push({ t: 0, update(dt) {
+    this.t += dt; const f = fuseScreen();
+    for (let i = 0; i < 4; i++) spark(f.x, f.y, rand(-2.5, 2.5), rand(-3.5, 0.5), { life: rand(0.2, 0.5), h: rand(30, 55), l: 70, g: 0.12, s: 1.4 });
+    glow(f.x, f.y, 50, 40, 0.8, 4);
+    if (this.t > 0.7) { s.el.classList.remove('lit'); onDone(); return false; }
+    return true;
+  } });
+}
+
+const START = {
+  anar() {
+    const R = staged.el.getBoundingClientRect(), N = svgPt(R, 30, 52), per = POLLUTION.anar;
+    hiss(4.6, 0.55, 1800, 700); crackle(30, 4.2, 0.12);
+    effects.push({ t: 0, dur: 4.6, update(dt, k) {
+      this.t += dt;
+      const ramp = Math.min(1, this.t / 0.4) * Math.min(1, (this.dur - this.t) / 0.8);
+      const n = Math.floor(7 * ramp + Math.random());
+      for (let i = 0; i < n; i++) {
+        const gold = Math.random() < 0.6;
+        spark(N.x + rand(-4, 4), N.y, rand(-1.6, 1.6), -rand(6, 12) * (0.6 + 0.4 * ramp),
+          { life: rand(1, 1.8), h: gold ? rand(32, 50) : pick([120, 330, 190]), l: gold ? 62 : 55, g: 0.13, d: 0.988, tw: true });
+      }
+      glow(N.x, N.y - 40, 170, 38, 0.55 * ramp, 6);
+      if (Math.random() < 0.3 * k) smoke(N.x, N.y - 30, 1);
+      pollute(per / this.dur * dt);
+      if (this.t >= this.dur) { finish(); return false; }
+      return true;
+    } });
+  },
+
+  rocket() {
+    const R = staged.el.getBoundingClientRect(), S = svgPt(R, 30, 50);
+    staged.el.style.opacity = 0;
+    const ty = H * rand(0.14, 0.32);
+    hiss(1.5, 0.5, 500, 2600);
+    effects.push({ x: S.x, y: S.y, vy: -9.5, sw: Math.random() * 6, update(dt, k) {
+      this.sw += dt * 14; this.x += Math.sin(this.sw) * 0.4 * k; this.y += this.vy * k; this.vy *= Math.pow(0.992, k);
+      for (let i = 0; i < 3; i++) spark(this.x + rand(-1.5, 1.5), this.y + 8, rand(-0.5, 0.5), rand(1, 2.5), { life: rand(0.35, 0.7), h: rand(25, 50), l: 65, g: 0.03, s: 1.7 });
+      if (Math.random() < 0.5) smoke(this.x, this.y + 10, 1, 0.5);
+      glow(this.x, this.y, 60, 35, 0.5, 5);
+      if (this.y <= ty || this.vy > -3) {
+        const hue = Math.floor(rand(0, 360)), x = this.x, y = this.y;
+        shell(x, y, pick(SHELLS), hue, 1); shake(false); pollute(POLLUTION.rocket * 0.5);
+        [[300, -90], [560, 110]].forEach(([d, dx]) => setTimeout(() => {
+          const yy = y + rand(-20, 70); shell(x + dx, yy, pick(SHELLS), (hue + rand(60, 240)) % 360, 0.7);
+          pollute(POLLUTION.rocket * 0.25);
+        }, d));
+        setTimeout(() => finish(), 1500);
+        return false;
+      }
+      return true;
+    } });
+  },
+
+  bomb() {
+    const R = staged.el.getBoundingClientRect(), C = svgPt(R, 30, 75);
+    staged.el.style.opacity = 0;
+    bang(1.5, 1.4); flashScreen(0.9); shake(true);
+    glow(C.x, C.y, 380, 35, 1.2, 1.6); ring(C.x, C.y, 1100);
+    for (let i = 0; i < 170; i++) { const a = Math.random() * 6.283, v = rand(1.5, 14);
+      spark(C.x, C.y, Math.cos(a) * v, Math.sin(a) * v - 2, { life: rand(0.35, 1.2), h: rand(8, 50), g: 0.15, d: 0.95, s: rand(1.4, 3) }); }
+    for (let i = 0; i < 24; i++) { const a = Math.random() * 6.283, v = rand(2, 8);
+      spark(C.x, C.y, Math.cos(a) * v, Math.sin(a) * v - 3, { life: rand(1, 1.8), h: 5, l: 45, s: 3.4, g: 0.2, d: 0.96, tw: true }); }
+    smoke(C.x, C.y, 16, 1.8); crackle(18, 0.8, 0.4);
+    pollute(POLLUTION.bomb);
+    setTimeout(() => finish(), 900);
+  },
+
+  chakri() {
+    const R = staged.el.getBoundingClientRect(), C = svgPt(R, 30, 104), per = POLLUTION.chakri;
+    staged.el.classList.add('spinning'); whirr(3.6); hiss(3.6, 0.2, 2200, 4500);
+    effects.push({ t: 0, dur: 3.6, ang: 0, update(dt, k) {
+      this.t += dt; const speed = 0.35 + 0.25 * Math.min(1, this.t / 1.2); this.ang += speed * k;
+      for (let j = 0; j < 4; j++) {
+        const a = this.ang + j * 1.57, r = 24, hue = pick([35, 48, 120, 18]);
+        spark(C.x + Math.cos(a) * r, C.y + Math.sin(a) * r * 0.5, -Math.sin(a) * 6 + rand(-1, 1), Math.cos(a) * 3 - rand(0.2, 1.5),
+          { life: rand(0.4, 0.8), h: hue, g: 0.12, d: 0.96, s: 1.5 });
+      }
+      glow(C.x, C.y - 10, 130, 38, 0.6, 6);
+      if (Math.random() < 0.15 * k) smoke(C.x, C.y - 20, 1, 0.7);
+      pollute(per / this.dur * dt);
+      if (this.t >= this.dur) {
+        staged.el.classList.remove('spinning'); bang(0.5, 0.6);
+        shell(C.x, C.y - 40, 'peony', Math.floor(rand(0, 360)), 0.5); finish(); return false;
+      }
+      return true;
+    } });
+  },
+
+  ladi() {
+    const R = staged.el.getBoundingClientRect(), per = POLLUTION.ladi, total = 16;
+    let i = 0, wait = 0;
+    effects.push({ update(dt) {
+      wait -= dt; if (wait > 0) return true;
+      const last = ++i === total, p = svgPt(R, 30 + rand(-6, 6), 34 + (i / total) * 84);
+      const big = last ? 1 : 0.35;
+      bang(0.45 + big * 0.9, 0.35 + big * 0.7); if (last) { flashScreen(0.7); shake(true); ring(p.x, p.y, 800); } else if (i % 4 === 0) shake(false);
+      glow(p.x, p.y, 120 + big * 200, 28, 1, 4);
+      for (let j = 0; j < (last ? 120 : 30); j++) { const a = Math.random() * 6.283, v = rand(1, last ? 11 : 5);
+        spark(p.x, p.y, Math.cos(a) * v, Math.sin(a) * v - 1, { life: rand(0.3, last ? 1 : 0.6), h: rand(5, 48), g: 0.14, d: 0.95, s: 1.8 }); }
+      smoke(p.x, p.y, last ? 10 : 2, last ? 1.6 : 0.7);
+      pollute(per / total);
+      if (last) { setTimeout(() => finish(), 700); return false; }
+      wait = rand(0.07, 0.17); return true;
+    } });
+  }
+};
+
+/* ======================= sparkler ======================= */
+function drawSparkler(dt, t) {
+  const x = ptr.x, y = ptr.y;
+  if (x < -100) return;
+  const dx = 0.27, dy = 0.96, len = Math.min(190, H * 0.3);
+  fx.save(); fx.lineCap = 'round';
+  fx.strokeStyle = '#8c8c94'; fx.lineWidth = 2.6;
+  fx.beginPath(); fx.moveTo(x, y); fx.lineTo(x + dx * len, y + dy * len); fx.stroke();
+  fx.strokeStyle = '#4a4a50'; fx.lineWidth = 4.5;
+  fx.beginPath(); fx.moveTo(x, y); fx.lineTo(x + dx * len * 0.4, y + dy * len * 0.4); fx.stroke();
+  fx.restore();
+  fx.globalCompositeOperation = 'lighter';
+  const fl = 0.75 + Math.random() * 0.25, g = fx.createRadialGradient(x, y, 0, x, y, 34 * fl);
+  g.addColorStop(0, 'rgba(255,255,240,.95)'); g.addColorStop(0.25, 'rgba(255,214,120,.55)'); g.addColorStop(1, 'rgba(255,150,40,0)');
+  fx.fillStyle = g; fx.beginPath(); fx.arc(x, y, 34, 0, 6.283); fx.fill();
+  fx.globalCompositeOperation = 'source-over';
+  for (let i = 0; i < 5; i++) {
+    const a = Math.random() * 6.283, v = rand(1, 4.5);
+    spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.2, 0.5), h: rand(38, 55), l: 72, g: 0.07, d: 0.95, s: 1.2 });
+  }
+}
+
+function drawFuseHint(t, f, near) {
+  fx.save();
+  fx.strokeStyle = near ? 'rgba(255,240,170,.95)' : 'rgba(255,200,87,.7)';
+  fx.lineWidth = 2; fx.setLineDash([4, 5]);
+  const r = 16 + Math.sin(t * 5) * 3;
+  fx.beginPath(); fx.arc(f.x, f.y, r, 0, 6.283); fx.stroke(); fx.restore();
+}
+
+/* ======================= AQI ======================= */
+const CATS = [
+  [50, 'Good', '#5fd068'], [100, 'Moderate', '#f2d349'], [150, 'Unhealthy (sensitive)', '#ff9a3c'],
+  [200, 'Unhealthy', '#ff5a4d'], [300, 'Very unhealthy', '#b45cff'], [Infinity, 'Hazardous', '#c4344d']
+];
+let lastCat = null;
+function renderAQI() {
+  const target = Math.min(500, (baseAQI ?? 0) + added);
+  shown += (target - shown) * 0.08;
+  const v = Math.round(shown), cat = CATS.find(c => v <= c[0]);
+  if (baseAQI == null) return;
+  $('#aqiNum').textContent = v;
+  $('#aqiBar').style.width = Math.min(100, v / 300 * 100) + '%';
+  if (lastCat !== cat) {
+    lastCat = cat; $('#aqiCat').textContent = cat[1];
+    document.documentElement.style.setProperty('--aqi-color', cat[2]);
+  }
+  $('#delta').textContent = `+${Math.round(added)} from your crackers`;
+  $('#count').textContent = `${bursts} burst`;
+}
+let lastBlur = -1, lastHaze = -1;
+function renderAtmosphere() {
+  const blur = Math.round(Math.min(12, added * 0.08) * 4) / 4;
+  if (blur !== lastBlur) { lastBlur = blur; skyC.style.filter = blur > 0 ? `blur(${blur}px) brightness(${1 - blur * 0.025})` : 'none'; }
+  const hz = Math.round(Math.min(0.72, added / 190) * 50) / 50;
+  if (hz !== lastHaze) { lastHaze = hz; haze.style.opacity = hz; }
+}
+
+async function loadAQI() {
+  const DEFAULT = { lat: 28.6139, lon: 77.209, label: 'New Delhi (default)' };
+  const pos = await new Promise(res => {
+    if (!navigator.geolocation) return res(null);
+    navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), () => res(null),
+      { timeout: 8000, maximumAge: 600000 });
+  });
+  const loc = pos ? { ...pos, label: 'Your location' } : DEFAULT;
+  $('#loc').textContent = loc.label;
+  // place name (best effort)
+  if (pos) fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${loc.lat}&longitude=${loc.lon}&localityLanguage=en`)
+    .then(r => r.json()).then(j => { const n = j.city || j.locality || j.principalSubdivision; if (n) $('#loc').textContent = n; }).catch(() => {});
+  try {
+    const r = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`);
+    const j = await r.json();
+    if (typeof j.current?.us_aqi !== 'number') throw new Error('no aqi');
+    baseAQI = Math.round(j.current.us_aqi);
+  } catch (e) {
+    baseAQI = 110;
+    $('#loc').textContent += ' · estimated';
+  }
+  shown = baseAQI;
+}
+
+/* ======================= main loop ======================= */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const k = dt * 60, t = now / 1000;
+  drawSky(t, dt);
+
+  // ignition check
+  let fz = null, near = false;
+  if (staged && staged.ready && !staged.lit && sparklerOn) {
+    fz = fuseScreen(); near = Math.hypot(ptr.x - fz.x, ptr.y - fz.y) < 30;
+    if (near) { const type = staged.type; igniteAnimation(() => START[type]()); }
+  }
+
+  for (let i = effects.length - 1; i >= 0; i--) if (!effects[i].update(dt, k)) effects.splice(i, 1);
+  updateParts(dt);
+  added = Math.max(0, added - dt * 0.3);
+
+  fx.clearRect(0, 0, W, H);
+  drawParts();
+  if (fz && !staged.lit) drawFuseHint(t, fz, near);
+  if (sparklerOn) drawSparkler(dt, t);
+  renderAQI(); renderAtmosphere();
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener('resize', resize);
+resize();
+loadAQI();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
