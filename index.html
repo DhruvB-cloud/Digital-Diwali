@@ -712,17 +712,17 @@ const PRESETS = { // The collection of behaviours
     whirr(dur); hiss(dur, 0.25, 2200, 4500); crackle(60, dur, 0.15); // Buzz, hiss and crackle sounds
     effects.push({ t: 0, rot: 0, x: C0.x, y: C0.y, dir: -Math.PI / 2, turn: 0, boost: 1, update(dt, k) { // Running effect: x,y is the wheel's centre, dir its heading
       this.t += dt; const life = Math.max(0, Math.min(1, (dur - this.t) / (dur * 0.3))); // 1 while burning strongly, fades to 0 in the last 30%
-      this.turn -= dt; if (this.turn <= 0) { this.dir += rand(-2, 2); this.turn = rand(0.15, 0.5); this.boost = Math.random() < 0.25 ? 1.8 : 1; } // Every fraction of a second: swerve randomly, sometimes dash
-      const v = 330 * this.boost * (0.25 + 0.75 * life), vx = Math.cos(this.dir) * v, vy = Math.sin(this.dir) * v; // Speed in pixels per second (slows as it dies)
+      this.turn -= dt; if (this.turn <= 0) { this.dir += rand(-2, 2); this.turn = rand(0.1, 0.3); this.boost = Math.random() < 0.25 ? 1.8 : 1; } // Every fraction of a second: swerve randomly, sometimes dash
+      const v = 660 * this.boost * (0.25 + 0.75 * life), vx = Math.cos(this.dir) * v, vy = Math.sin(this.dir) * v; // Speed in pixels per second (slows as it dies)
       this.x += vx * dt; this.y += vy * dt; // Move
       const m = rad + 12; // Keep the whole wheel on screen
       if (this.x < m) { this.x = m; this.dir = Math.PI - this.dir; } else if (this.x > W - m) { this.x = W - m; this.dir = Math.PI - this.dir; } // Bounce off the left/right edges
       if (this.y < m + 80) { this.y = m + 80; this.dir = -this.dir; } else if (this.y > H - m) { this.y = H - m; this.dir = -this.dir; } // Bounce off the top/bottom edges
-      this.rot += (3 + 14 * life) * dt; // Spin faster while strong
+      this.rot += (6 + 28 * life) * dt; // Spins twice as fast now, fastest while strong
       el.style.left = (this.x - o.center[0] / 60 * bw) + 'px'; el.style.top = (this.y - o.center[1] / 120 * bh) + 'px'; // Move the picture so its centre follows the wheel
       el.style.transform = `rotate(${this.rot}rad)`; // Rotate the picture (flat spin, no flipping)
       for (let j = 0; j < 6; j++) { // Six spark jets around the rim
-        const a = this.rot + j * 1.047, n = Math.ceil(2 * life + Math.random()); // Angle of this jet; sparks this frame
+        const a = this.rot + j * 1.047, n = Math.ceil(3 * life + Math.random()); // Angle of this jet; more sparks per frame for extra intensity
         for (let q = 0; q < n; q++) spark(this.x + Math.cos(a) * rad * 0.9, this.y + Math.sin(a) * rad * 0.9, // Start on the rim
           -Math.sin(a) * (5 + 4 * life) + Math.cos(a) * 1.5 + vx / 60 * 0.5 + rand(-1, 1), Math.cos(a) * (5 + 4 * life) + Math.sin(a) * 1.5 + vy / 60 * 0.5 + rand(-1, 1), // Fly off sideways (tangent), a bit outward, plus the wheel's own motion
           { life: rand(0.5, 1.1), h: pick(colors), l: 62, g: 0.1, d: 0.965, s: rand(1.8, 3), tw: true }); // Bigger, longer-lived coloured sparks
@@ -743,6 +743,7 @@ const PRESETS = { // The collection of behaviours
     const pts = Array.from({ length: N }, (_, i) => { const p = svgPt(R, 30, top + 6 + i * (bottom - top) / N); return { x: p.x, y: p.y, px: p.x, py: p.y, hits: 0 }; }); // One physics point per cracker (x,y now; px,py before)
     const floor = R.bottom - ch / 2; // The ground level the chain lands on
     staged.el.style.opacity = 0; // Hide the still picture; we draw the moving chain ourselves
+    const POW = 2.24; // Blast strength: speed x2.24 means about 5x the energy of before
     let n = 0, wait = 0.1, endT = -1, fade = 1; // Bangs so far, delay to next bang, time left after last bang, drawing opacity
     effects.push({ update(dt) { // Running effect
       for (let s = 0, steps = Math.max(1, Math.round(dt * 60)); s < steps; s++) { // Run the physics in 1/60-second steps
@@ -753,6 +754,7 @@ const PRESETS = { // The collection of behaviours
         } // End of thread constraint
         for (const p of pts) { // Collide with the ground and the walls
           if (p.y > floor) { const vy = p.y - p.py, vx = p.x - p.px; p.y = floor; p.py = p.y + vy * 0.35; p.px = p.x - vx * 0.8; } // Ground: bounce a little and rub (friction)
+          if (p.y < ch / 2) { const vy = p.y - p.py; p.y = ch / 2; p.py = p.y + vy * 0.35; } // Ceiling bounce so strong blasts keep the chain on screen
           if (p.x < cw / 2) { const vx = p.x - p.px; p.x = cw / 2; p.px = p.x + vx * 0.5; } // Left wall bounce
           if (p.x > W - cw / 2) { const vx = p.x - p.px; p.x = W - cw / 2; p.px = p.x + vx * 0.5; } // Right wall bounce
         } // End of collisions
@@ -761,14 +763,14 @@ const PRESETS = { // The collection of behaviours
       if (n < total && wait <= 0) { // Time for the next explosion
         n++; const last = n === total, idx = Math.min(N - 1, Math.floor((n - 1) / total * N)), p = pts[idx], big = last ? 1 : 0.35; // Which bang, is it the last, which cracker explodes
         p.hits++; // This cracker gets more burnt
-        p.px = p.x - rand(-10, 10) * (last ? 1.6 : 1); p.py = p.y + rand(10, 18) * (last ? 1.5 : 1); // Blast kicks it up and sideways
-        for (const q of [pts[idx - 1], pts[idx + 1]]) if (q) { q.px = q.x - rand(-4, 4); q.py = q.y + rand(3, 7); } // Neighbours get a smaller kick
-        if (last) for (const q of pts) { q.px = q.x - rand(-12, 12); q.py = q.y + rand(8, 20); } // The final bang throws every cracker
-        bang(0.45 + big * 0.9, 0.35 + big * 0.7); // Bang sound
-        if (last) { flashScreen(0.7); shake(true); ring(p.x, p.y, 800); } else if (n % 4 === 0) shake(false); // Flash/shake on the big one, jolts now and then
-        glow(p.x, p.y, 120 + big * 200, 28, 1, 4); // Flash of light
-        for (let j = 0; j < (last ? 120 : 30); j++) { const a = Math.random() * 6.283, v = rand(1, last ? 11 : 5); // Sparks
-          spark(p.x, p.y, Math.cos(a) * v, Math.sin(a) * v - 1, { life: rand(0.3, last ? 1 : 0.6), h: rand(5, 48), g: 0.14, d: 0.95, s: 1.8 }); } // Orange sparks
+        p.px = p.x - rand(-10, 10) * POW * (last ? 1.6 : 1); p.py = p.y + rand(10, 18) * POW * (last ? 1.5 : 1); // Blast kicks it up and sideways
+        for (const q of [pts[idx - 1], pts[idx + 1]]) if (q) { q.px = q.x - rand(-4, 4) * POW; q.py = q.y + rand(3, 7) * POW; } // Neighbours get a smaller kick
+        if (last) for (const q of pts) { q.px = q.x - rand(-12, 12) * POW; q.py = q.y + rand(8, 20) * POW; } // The final bang throws every cracker
+        bang(1.1 + big * 1.2, 0.6 + big * 0.8); // Much louder, longer bang
+        flashScreen(last ? 0.8 : 0.35); shake(true); ring(p.x, p.y, last ? 1000 : 600); // Every bang now flashes, shakes the screen and sends a shockwave
+        glow(p.x, p.y, 300 + big * 300, 28, 1.2, 3); // Big flash of light
+        for (let j = 0; j < (last ? 300 : 90); j++) { const a = Math.random() * 6.283, v = rand(2, last ? 20 : 11); // Many more, much faster sparks
+          spark(p.x, p.y, Math.cos(a) * v, Math.sin(a) * v - 1, { life: rand(0.4, last ? 1.2 : 0.9), h: rand(5, 48), g: 0.14, d: 0.95, s: 2.2 }); } // Orange sparks
         smoke(p.x, p.y, last ? 10 : 2, last ? 1.6 : 0.7); // Smoke
         pollute(c.pollution / total); // Add AQI
         wait = rand(0.2, 0.4); if (last) endT = 1.2; // Pause before the next bang; after the last one, let it tumble for a bit
