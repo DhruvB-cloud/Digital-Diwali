@@ -36,35 +36,38 @@
       rgba(60,52,48,.55)} /* Light overall grey-brown tint */
   #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30} /* White flash used when a big bang goes off */
 
-  .brand{position:fixed;top:14px;left:16px;z-index:40;font-weight:700;letter-spacing:.04em; /* Title text in the top-left corner */
+  .brand{position:fixed;top:30px;left:16px;z-index:40;font-weight:700;letter-spacing:.04em; /* Title text in the top-left corner */
     font-size:clamp(15px,2.4vw,20px);color:var(--gold);text-shadow:0 0 14px rgba(255,200,87,.45);pointer-events:none} /* Responsive size, golden glow */
-  #snd{position:fixed;top:46px;left:14px;z-index:40;width:38px;height:38px;border-radius:50%; /* Round sound on/off button */
-    border:1px solid rgba(255,255,255,.2);background:rgba(18,16,22,.6);color:#fff;font-size:18px;cursor:pointer;padding:0} /* Dark glass look */
-  #aqi{position:fixed;top:12px;right:12px;z-index:40;width:min(215px,52vw);padding:10px 13px 11px; /* AQI card in the top-right corner */
-    border-radius:14px;background:rgba(18,16,22,.62);border:1px solid rgba(255,255,255,.12); /* Rounded dark glass card */
+  .brand .sub{display:block;font-size:11px;font-weight:500;letter-spacing:.02em;color:#ffe9b8;opacity:.8;text-shadow:none} /* Small tagline under the title */
+  #ctl{position:fixed;top:78px;left:12px;z-index:40;display:flex;flex-direction:column;gap:8px} /* Column of round control buttons (sound, calm mode) */
+  #ctl button{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,200,87,.35);background:rgba(34,20,10,.66);color:#fff;font-size:20px;cursor:pointer;padding:0} /* 44px round buttons: easy to tap, warm dark glass look */
+  #ctl button[aria-pressed="true"]{background:rgba(255,200,87,.28)} /* Highlight when calm mode is on */
+  #aqi{position:fixed;top:30px;right:12px;z-index:40;width:min(215px,52vw);padding:10px 13px 11px; /* AQI card in the top-right corner */
+    border-radius:14px;background:rgba(34,20,10,.66);border:1px solid rgba(255,200,87,.3); /* Rounded warm dark glass card with a gold edge */
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none} /* Blur what is behind the card */
-  #aqi .row{display:flex;justify-content:space-between;gap:8px;font-size:11px;opacity:.75;letter-spacing:.05em;text-transform:uppercase} /* Top row: label + place */
+  #aqi .row{display:flex;justify-content:space-between;gap:8px;font-size:12px;opacity:.8;letter-spacing:.05em;text-transform:uppercase} /* Top row: label + place */
   #aqi .row span:first-child{white-space:nowrap} /* Keep "AQI · US" on one line */
   #aqi #loc{text-transform:none;letter-spacing:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} /* Place name: trims with ... if too long */
   #aqi .big{display:flex;align-items:baseline;gap:10px;margin:2px 0 6px} /* Row holding the big number and its category */
   #aqiNum{font-size:clamp(32px,6vw,42px);font-weight:800;color:var(--aqi-color);line-height:1;font-variant-numeric:tabular-nums;transition:color .6s} /* Big AQI number */
   #aqiCat{font-size:12px;font-weight:600;color:var(--aqi-color);transition:color .6s} /* Category text like "Unhealthy" */
-  .db{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;font-size:11px;opacity:.9;letter-spacing:.05em;text-transform:uppercase} /* Noise row: label on the left, dB value on the right */
+  .db{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;font-size:12px;opacity:.9;letter-spacing:.05em;text-transform:uppercase} /* Noise row: label on the left, dB value on the right */
   #dbNum{text-transform:none;font-size:15px;font-weight:800;letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--db-color,#5fd068);transition:color .3s} /* The decibel number, coloured by loudness */
   #dbBar{background:var(--db-color,#5fd068)} /* The noise bar uses the same loudness colour */
   #dbWarn{margin-top:5px;display:flex;flex-direction:column;gap:3px} /* Holds the warning chips */
-  #dbWarn span{display:block;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(255,70,60,.22);border:1px solid rgba(255,90,80,.6);color:#ffb4ad;animation:pulse .6s ease-in-out infinite alternate} /* A red pulsing warning chip */
+  #dbWarn span{display:block;padding:3px 8px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(255,70,60,.22);border:1px solid rgba(255,90,80,.6);color:#ffb4ad;animation:pulse .6s ease-in-out infinite alternate} /* A red pulsing warning chip */
   #dbWarn span[hidden]{display:none} /* Hidden chips take no space */
   @keyframes pulse{to{background:rgba(255,70,60,.45)}} /* Pulse animation for the warning chips */
   .bar{height:5px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden} /* Track of the AQI progress bar */
   .bar i{display:block;height:100%;width:0;background:var(--aqi-color);border-radius:5px;transition:background .6s} /* Filled part of the bar */
-  .meta{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;opacity:.8} /* Bottom row: added AQI + crackers count */
+  .meta{display:flex;justify-content:space-between;margin-top:7px;font-size:12px;opacity:.85} /* Bottom row: added AQI + crackers count */
 
-  #hint{position:fixed;left:50%;top:56px;transform:translateX(-50%);z-index:40;max-width:88vw;text-align:center; /* Instruction pill at top centre */
+  #hint{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:40;max-width:88vw;text-align:center; /* Instruction pill at top centre */
     padding:8px 16px;border-radius:999px;background:rgba(18,16,22,.55);border:1px solid rgba(255,200,87,.25); /* Pill shape with golden border */
     font-size:clamp(12px,2.2vw,15px);color:#ffe9b8;pointer-events:none;transition:opacity .4s;white-space:nowrap} /* Responsive text, fades in/out */
   #hint.off{opacity:0} /* Hidden state of the hint */
-  @media (max-width:560px){ #hint{top:auto;bottom:calc(var(--trayh,130px) + 8px);white-space:normal} } /* On phones, move hint just above the tray */
+  #clear{pointer-events:auto;margin-top:7px;width:100%;padding:7px 8px;border-radius:10px;border:1px solid rgba(255,200,87,.55);background:rgba(255,200,87,.16);color:#ffe9b8;font:inherit;font-size:13px;font-weight:700;cursor:pointer} /* "Clear the air" button inside the AQI card (it must stay clickable) */
+  #clear[hidden]{display:none} /* Hidden until the air is dirty */
 
   #tray{position:absolute;left:0;right:0;bottom:0;z-index:15;display:flex;align-items:flex-end; /* Bottom row that holds all firecrackers */
     gap:clamp(6px,2.2vw,28px);padding:10px 10px calc(10px + env(safe-area-inset-bottom)); /* Spacing; respects phone home-bar area */
@@ -76,11 +79,11 @@
   .cracker{flex:0 0 auto;appearance:none;background:none;border:0;padding:0;color:inherit;font:inherit;display:flex;flex-direction:column; /* One selectable firecracker button */
     align-items:center;gap:4px;cursor:pointer;transition:transform .2s, filter .2s} /* Icon above its name; smooth hover */
   .cracker svg{width:var(--cw);height:calc(var(--cw)*2);display:block;filter:drop-shadow(0 0 6px rgba(120,160,255,.25))} /* Icon is twice as tall as wide */
-  .cracker span{font-size:11px;opacity:.85;letter-spacing:.03em;white-space:nowrap} /* Name label under the icon */
+  .cracker span{font-size:12px;opacity:.9;letter-spacing:.03em;white-space:nowrap} /* Name label under the icon */
   .cracker:hover{transform:translateY(-8px);filter:brightness(1.2)} /* Lift and brighten on hover */
-  .cracker.picked{opacity:0;pointer-events:none} /* Hide the icon in the tray once it has been picked */
+  .cracker.picked{opacity:.22;filter:grayscale(1);pointer-events:none} /* Dim (not remove) the icon once picked, so the row keeps its shape */
   .cracker:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:6px} /* Keyboard focus ring */
-  @media (min-width:700px){ :root{--cw:56px} .cracker span{font-size:12px} } /* Bigger icons on desktops/tablets */
+  @media (min-width:700px){ :root{--cw:56px} .cracker span{font-size:13px} } /* Bigger icons and labels on desktops/tablets */
 
   .staged{position:absolute;z-index:10;transition:left .65s cubic-bezier(.2,.9,.25,1),top .65s cubic-bezier(.2,.9,.25,1), /* The cracker that glides to the centre */
     width .65s cubic-bezier(.2,.9,.25,1),height .65s cubic-bezier(.2,.9,.25,1),opacity .5s;pointer-events:none} /* Smooth move + resize */
@@ -88,6 +91,49 @@
   .staged.gone{opacity:0} /* Fade-out when the cracker is used up */
   .staged.lit svg{animation:jit .08s linear infinite} /* Tiny shiver while the fuse is burning */
   @keyframes jit{50%{transform:translateX(1px)}} /* Shiver movement */
+
+  /* ---------- Festive decorations ---------- */
+  #toran{position:fixed;top:0;left:0;right:0;height:26px;z-index:35;pointer-events:none;opacity:.92; /* Marigold garland hanging across the top of the screen */
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='26'%3E%3Cpath d='M0 2 Q22 24 44 2' fill='none' stroke='%23a8531a' stroke-width='1.5'/%3E%3Ccircle cx='5' cy='6' r='3.6' fill='%23ff9f1c'/%3E%3Ccircle cx='13' cy='12' r='3.6' fill='%23ffbf00'/%3E%3Ccircle cx='22' cy='15' r='4.2' fill='%23ff7b00'/%3E%3Ccircle cx='31' cy='12' r='3.6' fill='%23ffbf00'/%3E%3Ccircle cx='39' cy='6' r='3.6' fill='%23ff9f1c'/%3E%3C/svg%3E") repeat-x} /* One garland tile (orange and yellow flowers on a string), repeated sideways */
+  .diya{position:absolute;bottom:14px;width:54px;z-index:16;display:none;pointer-events:none} /* Decorative lamps, only on wide screens */
+  .diya svg{width:100%;display:block;filter:drop-shadow(0 0 14px rgba(255,170,50,.85))} /* Warm glow around each lamp */
+  @media (min-width:900px){ .diya{display:block} } /* Show the lamps only when there is spare room beside the tray */
+  #diyaL{left:28px} #diyaR{right:28px} /* One lamp on each side */
+  .flame{transform-box:fill-box;transform-origin:50% 95%;animation:flick .18s ease-in-out infinite alternate} /* The flame flickers */
+  @keyframes flick{to{transform:scale(.92,1.14) rotate(3deg)}} /* Flicker movement */
+  #praise{position:fixed;left:50%;top:34%;transform:translateX(-50%);z-index:45;font-size:clamp(26px,7vw,44px);font-weight:800;color:#ffd45a;text-shadow:0 0 18px rgba(255,160,40,.8);pointer-events:none;opacity:0;white-space:nowrap} /* Cheerful word that pops up after each cracker */
+  #praise.go{animation:praise 1.6s ease-out} /* Plays the pop-up animation */
+  @keyframes praise{0%{opacity:0;transform:translate(-50%,20px) scale(.7)}20%{opacity:1;transform:translate(-50%,0) scale(1.1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}} /* Pop in, hold, float away */
+  .arr{position:absolute;bottom:calc(var(--trayh,130px) / 2 - 16px);z-index:16;font-size:38px;line-height:1;color:var(--gold);opacity:0;pointer-events:none;transition:opacity .3s;text-shadow:0 0 10px rgba(255,200,87,.7)} /* Arrows that say "more crackers this way" */
+  #arrL{left:3px} #arrR{right:3px} /* Left and right positions */
+  .arr.on{opacity:.95;animation:nudge .8s ease-in-out infinite alternate} /* Visible and gently nudging */
+  @keyframes nudge{to{transform:translateX(5px)}} /* Nudge movement */
+  #splash{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px; /* Welcome screen covering everything */
+    background:radial-gradient(ellipse at 50% 62%,rgba(130,55,10,.55),rgba(8,4,2,.9) 72%);transition:opacity .6s} /* Warm glow over a dark sky */
+  #splash.hide{opacity:0;pointer-events:none} /* Fades away when started */
+  .sp-card{text-align:center;max-width:460px} /* Centred content box */
+  .sp-diyas{font-size:34px;letter-spacing:10px;animation:flick .4s ease-in-out infinite alternate} /* Row of lamps */
+  .sp-card h1{margin:6px 0 0;font-size:clamp(38px,11vw,72px);line-height:1.15;background:linear-gradient(#fff1b8,#ffb52e 60%,#ff7a18);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,160,40,.5))} /* Big golden greeting */
+  .sp-card h2{margin:4px 0 12px;font-size:clamp(20px,5vw,28px);color:#ffe9b8;font-weight:700} /* English greeting */
+  .sp-card p{margin:0 auto;max-width:360px;font-size:clamp(15px,4vw,18px);line-height:1.5;color:#f4dcc0} /* Short explanation for parents and kids */
+  #start{margin-top:22px;min-height:56px;padding:0 32px;border:0;border-radius:999px;font:inherit;font-size:19px;font-weight:800;color:#3a1600;background:linear-gradient(#ffe08a,#ffa726);box-shadow:0 0 28px rgba(255,170,50,.55);cursor:pointer} /* Big friendly start button */
+  .sp-card small{display:block;margin-top:14px;font-size:13px;color:#d9bfa0} /* Volume reminder */
+
+  /* ---------- Small screens: phones in portrait or landscape ---------- */
+  @media (max-width:560px), (max-height:480px){ /* Compact layout */
+    .brand{font-size:13px;left:10px} .brand .sub{display:none} /* Smaller title, no tagline */
+    #ctl{top:62px;left:8px} #ctl button{width:42px;height:42px;font-size:18px} /* Controls tuck under the title */
+    #aqi{width:min(152px,46vw);padding:6px 8px 7px;right:8px} /* Narrow AQI card that never covers the title */
+    #aqi .bar{display:none} /* Bars are hidden to save space */
+    #praise{top:50%} /* Cheer pops up below the AQI card instead of over it */
+    #aqi .row{font-size:11px} #aqiNum{font-size:28px} #aqiCat{font-size:12px} #aqi .big{margin:0 0 3px;gap:6px} /* Tighter numbers */
+    .meta{margin-top:2px;white-space:nowrap;font-size:11px} .db{margin-top:4px;font-size:11px} #aqiCat{white-space:nowrap} /* One-line rows */
+    #aqi .big{flex-wrap:nowrap} #dbNum{font-size:14px} #dbWarn span{padding:2px 6px} /* Tighter rows */
+    #hint{top:auto;bottom:var(--hintb,calc(var(--trayh,130px) + 8px));width:max-content;max-width:86vw;white-space:normal;font-size:13px;padding:6px 12px} /* Hint sits just above the chosen cracker */
+  } /* End of compact layout */
+  @media (max-height:480px){ :root{--cw:34px} .cracker span{display:none} #tray{padding-top:6px} } /* Short (landscape) screens: smaller icons, no labels, so the tray does not eat the screen */
+  body.lite #aqi,body.lite #ctl button{backdrop-filter:none;-webkit-backdrop-filter:none} /* "Lite" mode for slower phones: skip costly blur effects */
+  body.lite #sky{transition:none} /* ...and skip the sky blur animation */
 </style> <!-- End of styles -->
 </head> <!-- End of head -->
 <body> <!-- Everything visible starts here -->
@@ -96,23 +142,42 @@
   <div id="haze"></div> <!-- Layer 2: smog that grows with pollution -->
   <div id="tray"></div> <!-- Layer 3: bottom row of firecrackers (filled by JavaScript) -->
   <canvas id="fx"></canvas> <!-- Layer 4: sparks, fireworks and the sparkler -->
+  <div id="arrL" class="arr">‹</div><div id="arrR" class="arr">›</div> <!-- "More crackers" arrows for small screens -->
+  <div id="diyaL" class="diya"><svg viewBox="0 0 60 56" aria-hidden="true"><g class="flame"><path d="M30 2 C40 14 38 24 30 27 C22 24 20 14 30 2Z" fill="#ffd45a"/><path d="M30 12 C35 18 34 24 30 26 C26 24 25 18 30 12Z" fill="#ff8c1a"/></g><path d="M4 30 Q30 58 56 30 Z" fill="#c2672b"/><ellipse cx="30" cy="30" rx="26" ry="5" fill="#8a3f14"/><ellipse cx="30" cy="30" rx="18" ry="3" fill="#ffcf6b" opacity=".8"/></svg></div> <!-- Left decorative diya (clay lamp) -->
+  <div id="diyaR" class="diya"><svg viewBox="0 0 60 56" aria-hidden="true"><g class="flame"><path d="M30 2 C40 14 38 24 30 27 C22 24 20 14 30 2Z" fill="#ffd45a"/><path d="M30 12 C35 18 34 24 30 26 C26 24 25 18 30 12Z" fill="#ff8c1a"/></g><path d="M4 30 Q30 58 56 30 Z" fill="#c2672b"/><ellipse cx="30" cy="30" rx="26" ry="5" fill="#8a3f14"/><ellipse cx="30" cy="30" rx="18" ry="3" fill="#ffcf6b" opacity=".8"/></svg></div> <!-- Right decorative diya -->
 </div> <!-- End of world -->
+<div id="toran" aria-hidden="true"></div> <!-- Marigold garland across the top -->
 <div id="flash"></div> <!-- Full-screen white flash overlay -->
 
-<div class="brand">🪔 Diwali Dhamaka</div> <!-- Site title -->
-<button id="snd" aria-label="Toggle sound" title="Sound on/off">🔊</button> <!-- Mute / unmute button -->
+<div class="brand">🪔 Diwali Dhamaka<span class="sub">A pollution-free Diwali 🌿</span></div> <!-- Site title and tagline -->
+<div id="ctl"> <!-- Control buttons -->
+  <button id="snd" aria-label="Toggle sound" title="Sound on/off">🔊</button> <!-- Mute / unmute button -->
+  <button id="calm" aria-label="Calm mode: less flashing and shaking" aria-pressed="false" title="Calm mode: less flashing and shaking">✨</button> <!-- Reduces flashes and shaking -->
+</div> <!-- End of controls -->
 
 <div id="aqi" aria-live="polite"> <!-- AQI card; screen readers announce changes -->
-  <div class="row"><span>AQI · US</span><span id="loc">Locating…</span></div> <!-- Label and detected place name -->
+  <div class="row"><span title="Air Quality Index (US scale)">🌫️ AQI</span><span id="loc">—</span></div> <!-- Label and detected place name -->
   <div class="big"><span id="aqiNum">--</span><span id="aqiCat">&nbsp;</span></div> <!-- Big number and category -->
   <div class="bar"><i id="aqiBar"></i></div> <!-- Coloured progress bar -->
-  <div class="meta"><span id="delta">+0 from your crackers</span><span id="count">0 burst</span></div> <!-- Extra AQI caused by you and burst count -->
+  <div class="meta"><span id="delta">+0 from crackers</span><span id="count">🎆 0 lit</span></div> <!-- Extra AQI caused by you and burst count -->
   <div class="db"><span>🔊 Noise</span><b id="dbNum">38 dB</b></div> <!-- Current loudness in decibels -->
   <div class="bar"><i id="dbBar"></i></div> <!-- Loudness bar -->
-  <div id="dbWarn"><span id="wDog" hidden>🐕 Painful for dogs</span><span id="wHuman" hidden>👂 Painful for humans</span></div> <!-- Warnings that appear when it gets too loud -->
+  <div id="dbWarn"><span id="wDog" hidden>🐶 Painful for dogs!</span><span id="wHuman" hidden>👂 Painful for humans!</span></div> <!-- Warnings that appear when it gets too loud -->
+  <button id="clear" hidden>🌬️ Clear the air</button> <!-- Appears when the air is dirty; clears the smoke quickly -->
 </div> <!-- End of AQI card -->
 
 <div id="hint">Pick a firecracker from below ✨</div> <!-- Instruction text shown to the player -->
+<div id="praise" aria-hidden="true"></div> <!-- Cheerful word shown after each cracker -->
+<div id="splash" role="dialog" aria-label="Welcome"> <!-- Welcome screen -->
+  <div class="sp-card"> <!-- Centred content -->
+    <div class="sp-diyas" aria-hidden="true">🪔 🪔 🪔</div> <!-- Row of lamps -->
+    <h1>शुभ दीपावली</h1> <!-- "Shubh Deepavali" in Hindi -->
+    <h2>Happy Diwali!</h2> <!-- English greeting -->
+    <p>Light crackers with a sparkler — no smoke, no burns, no scared pets. 🌿</p> <!-- Short pitch -->
+    <button id="start">🪔 Let's celebrate</button> <!-- Starts the experience (also unlocks sound) -->
+    <small>🔊 Sound on — set the volume to a comfortable level</small> <!-- Gentle volume reminder -->
+  </div> <!-- End of content -->
+</div> <!-- End of welcome screen -->
 
 <script> /* ---------- All the behaviour lives below ---------- */
 (() => { // Wrap everything in a function so nothing leaks into the global scope
@@ -259,11 +324,14 @@ let W = 0, H = 0, DPR = 1; // Screen width, height and pixel density (filled in 
    SECTION 3 — SOUND (all sounds are generated in code, no files needed)
    ===================================================================== */
 let ac = null, master = null, noiseBuf = null, muted = false, sparkNode = null; // Audio engine, volume knob, noise sample, mute flag, sparkler sound
+let calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); // Calm mode starts ON if the device asks for reduced motion
+const VOL = 0.5; // Master volume (0 to 1): kept moderate because crackers are loud
 const DB_BASE = 38, DB_DOG = 80, DB_HUMAN = 120; // Quiet village night level, and the dB limits where it becomes painful for dogs / humans (edit freely)
-let dbLevel = DB_BASE, dogUntil = 0, humanUntil = 0; // Current loudness, and until when each warning stays visible
+let dbLevel = DB_BASE, dogUntil = 0, humanUntil = 0, dbPeak = DB_BASE, peakUntil = 0; // Current loudness, when each warning ends, and the held peak reading shown for 3 seconds
 function addDb(db) { // Registers a loud sound of `db` decibels (works even if the sound is muted)
   const now = performance.now() / 1000; // Current time in seconds
   dbLevel = Math.max(dbLevel, Math.min(150, db)); // The meter jumps up to the loudest sound (max 150)
+  if (now > peakUntil || db >= dbPeak) { dbPeak = Math.min(150, db); peakUntil = now + 3; } // Remember the loudest recent sound so the number matches the warnings
   if (db >= DB_DOG) dogUntil = now + 3; // Too loud for dogs: keep that warning for 3 seconds
   if (db >= DB_HUMAN) humanUntil = now + 3; // Too loud for humans: keep that warning for 3 seconds
 } // End of addDb
@@ -272,7 +340,7 @@ function ensureAudio() { // Creates/unlocks audio (browsers only allow it after 
     const AC = window.AudioContext || window.webkitAudioContext; // Standard name, or the older Safari name
     if (!AC) return false; // Very old browser: no sound possible
     ac = new AC(); // Create the audio engine
-    master = ac.createGain(); master.gain.value = muted ? 0 : 0.85; // Master volume knob
+    master = ac.createGain(); master.gain.value = muted ? 0 : VOL; // Master volume knob
     const comp = ac.createDynamicsCompressor(); // Compressor stops loud bangs from distorting
     master.connect(comp); comp.connect(ac.destination); // Route: master -> compressor -> speakers
     noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate); // Two seconds of empty audio
@@ -346,9 +414,15 @@ function stopSparklerSound() { // Stops the sparkler fizz
   try { sparkNode.n.stop(); } catch (e) {} // Stop the noise, ignoring errors
   sparkNode = null; // Forget it
 } // End of stopSparklerSound
+$('#calm').addEventListener('click', e => { // When the calm-mode button is pressed
+  e.stopPropagation(); calm = !calm; // Flip calm mode
+  $('#calm').textContent = calm ? '🌙' : '✨'; $('#calm').setAttribute('aria-pressed', calm); // Update the icon and accessibility state
+  setHint(calm ? 'Calm mode on: gentler flashes and no shaking 🌙' : 'Calm mode off ✨'); // Tell the player
+}); // End of click handler
+$('#calm').textContent = calm ? '🌙' : '✨'; $('#calm').setAttribute('aria-pressed', calm); // Show the right state at start
 $('#snd').addEventListener('click', e => { // When the sound button is pressed
   e.stopPropagation(); ensureAudio(); muted = !muted; // Unlock audio and flip the mute flag
-  if (master) master.gain.value = muted ? 0 : 0.85; // Apply the new volume
+  if (master) master.gain.value = muted ? 0 : VOL; // Apply the new volume
   $('#snd').textContent = muted ? '🔇' : '🔊'; // Show the matching icon
 }); // End of click handler
 ['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, ensureAudio, { passive: true })); // Unlock audio on the very first tap/click/key (needed on phones)
@@ -426,6 +500,7 @@ function resize() { // Runs at start and whenever the window size changes
       h: warm ? rand(25, 50) : rand(200, 230), sat: warm ? 70 : rand(30, 80), l: warm ? 85 : rand(82, 96) }; // Colour: blue-white or warm
   }); // End of star creation
   document.documentElement.style.setProperty('--trayh', ($('#tray').offsetHeight || 130) + 'px'); // Tell CSS how tall the tray is
+  updateArrows(); // Refresh the tray arrows
   if (staged && staged.ready) placeStaged(false); // Re-centre the chosen cracker after a resize
 } // End of resize
 
@@ -469,6 +544,7 @@ function placeStaged(animate) { // Moves the chosen cracker to its target place
   const t = stagedTarget(), s = staged.el.style; // Target and the element's style
   if (!animate) s.transition = 'none'; // Jump instantly when not animating
   s.left = t.left + 'px'; s.top = t.top + 'px'; s.width = t.w + 'px'; s.height = t.h + 'px'; // Apply position and size
+  document.documentElement.style.setProperty('--hintb', (H - t.top + 10) + 'px'); // On phones, keep the hint just above the cracker (never on top of it)
   if (!animate) { void staged.el.offsetWidth; s.transition = ''; } // Force layout, then re-enable animation
 } // End of placeStaged
 function selectCracker(btn, def) { // Called when a cracker in the tray is tapped
@@ -489,13 +565,23 @@ function selectCracker(btn, def) { // Called when a cracker in the tray is tappe
   if (!ptr.seen) { ptr.x = W * 0.62; ptr.y = H * 0.5; } // If no pointer seen yet, place the sparkler somewhere sensible
   setHint(ptr.touch ? 'Drag the sparkler tip onto the fuse 🔥' : 'Touch the sparkler tip to the fuse to light it 🔥'); // Tell the player what to do
 } // End of selectCracker
-function dropStaged() { staged.el.remove(); staged.btn.classList.remove('picked'); staged = null; } // Puts an unlit cracker back in the tray
+function dropStaged() { staged.el.remove(); staged.btn.classList.remove('picked'); staged = null; document.documentElement.style.removeProperty('--hintb'); } // Puts an unlit cracker back in the tray
+const PRAISE = ['Wow! ⭐', 'Dhamaka! 💥', 'Shabash! 🌟', 'Awesome! 🎇', 'Bahut khoob! ✨', 'Shubh Deepavali! 🪔']; // Cheerful words
+function praise() { const el = $('#praise'); el.textContent = pick(PRAISE); el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); } // Shows a random cheer that pops up and floats away
+let clearing = false; // True while the 'Clear the air' button is working
+function updateArrows() { // Shows arrows when the tray has more crackers off-screen
+  const t = $('#tray'); // The tray
+  $('#arrL').classList.toggle('on', t.scrollLeft > 8); // Arrow on the left if scrolled right
+  $('#arrR').classList.toggle('on', t.scrollLeft + t.clientWidth < t.scrollWidth - 8); // Arrow on the right if more to the right
+} // End of updateArrows
+$('#tray').addEventListener('scroll', updateArrows, { passive: true }); // Update arrows while scrolling
 function finish(msg = 'Boom! Pick another one 🎆') { // Called when a cracker has finished burning
   const s = staged; if (!s) return; // Nothing to finish
   s.el.classList.add('gone'); setTimeout(() => s.el.remove(), 600); // Fade the cracker away then delete it
   s.btn.classList.remove('picked'); // Show its icon in the tray again (unlimited supply)
   staged = null; sparklerOn = false; document.body.classList.remove('sparkler'); stopSparklerSound(); // Back to normal cursor, stop fizz
-  bursts++; setHint(msg); // Count it and show a message
+  bursts++; setHint(msg); praise(); document.documentElement.style.removeProperty('--hintb'); // Count it, show a message, pop up a cheer
+  if (clearing) clearing = false; // A new cracker ends any 'clear the air' action
 } // End of finish
 const fuseScreen = () => { // Screen position of the fuse tip of the staged cracker
   const r = staged.el.querySelector('.fuse-tip').getBoundingClientRect(); // Bounding box of the marker circle
@@ -507,9 +593,11 @@ const svgPt = (R, x, y) => ({ x: R.left + x / 60 * R.width, y: R.top + y / 120 *
    SECTION 7 — PARTICLES (sparks, smoke) AND LIGHT EFFECTS
    ===================================================================== */
 const parts = [], lights = [], effects = []; // All sparks/smoke, glows/rings, and running cracker behaviours
-const MAX_PARTS = 3200; // Safety limit so phones do not slow down
+let maxParts = 3200, lite = /[?&]lite/.test(location.search); // Safety limit on sparks; 'lite' mode (automatic on slow devices, or add ?lite to the address) uses fewer
+if (lite) { maxParts = 1500; document.body.classList.add('lite'); } // Apply lite mode right away if requested
 function spark(x, y, vx, vy, o = {}) { // Creates one spark (or smoke puff)
-  if (parts.length > MAX_PARTS) return; // Too many already: skip
+  if (parts.length > maxParts) return; // Too many already: skip
+  if (lite && (o.kind ?? 'spark') !== 'smoke' && Math.random() < 0.45) return; // In lite mode, drop about half of the sparks
   const life = o.life ?? 1; // How many seconds it lives
   parts.push({ x, y, px: x, py: y, vx, vy, life, max: life, h: o.h ?? 40, l: o.l ?? 60, s: o.s ?? 1.6, // Position, previous position, speed, life, colour, size
     g: o.g ?? 0.06, d: o.d ?? 0.985, tw: o.tw ?? false, split: o.split ?? 0, kind: o.kind ?? 'spark' }); // Gravity, air drag, flicker, splits in two, type
@@ -518,13 +606,20 @@ function smoke(x, y, n = 1, big = 1) { // Creates grey smoke puffs
   for (let i = 0; i < n; i++) spark(x + rand(-8, 8), y + rand(-8, 8), rand(-0.6, 0.6), rand(-1.1, -0.2), // Slightly random start, drifts upward
     { kind: 'smoke', life: rand(2.5, 4.5), s: rand(14, 26) * big, g: -0.004, d: 0.99 }); // Long-lived and big
 } // End of smoke
-function glow(x, y, r, h, a = 1, decay = 2.4) { lights.push({ x, y, r, h, a, decay }); } // Adds a soft glowing light that fades
+let lastFlash = 0, lastShake = 0; // When the last flash / shake happened (to limit how often they repeat)
+function glow(x, y, r, h, a = 1, decay = 2.4) { lights.push({ x, y, r, h, a: calm ? a * 0.45 : a, decay }); } // Adds a soft glowing light that fades (dimmer in calm mode)
 function ring(x, y, v = 900) { lights.push({ x, y, r: 8, vr: v, a: 1, decay: 2.2, ring: true }); } // Adds an expanding shockwave ring
-function flashScreen(a) { // Briefly flashes the whole screen white
+function flashScreen(a) { // Briefly flashes the whole screen white (gently, and never more than ~2 times a second)
+  const now = performance.now(); // Current time in milliseconds
+  if (calm || now - lastFlash < 450) return; // Calm mode: no flashes. Otherwise skip if the last one was too recent (photosensitivity safety)
+  lastFlash = now; a = Math.min(a, 0.28); // Remember this flash and cap its brightness
   const f = $('#flash'); f.style.transition = 'none'; f.style.opacity = a; void f.offsetWidth; // Instantly set brightness
   f.style.transition = 'opacity .55s ease-out'; f.style.opacity = 0; // Then fade out
 } // End of flashScreen
-function shake(big = true) { // Shakes the screen (big or small)
+function shake(big = true) { // Shakes the screen (big or small), but not in calm mode and not too often
+  const now = performance.now(); // Current time in milliseconds
+  if (calm || now - lastShake < 500) return; // Skip in calm mode or if the last shake was very recent
+  lastShake = now; // Remember this shake
   const cls = big ? 'shake' : 'tick'; // Pick the animation
   world.classList.remove('shake', 'tick'); void world.offsetWidth; world.classList.add(cls); // Restart the animation
   if (navigator.vibrate) navigator.vibrate(big ? 60 : 15); // Phones also vibrate a little
@@ -552,14 +647,20 @@ function updateParts(dt) { // Moves all sparks and lights forward in time
     if (l.a <= 0) lights.splice(i, 1); // Remove when invisible
   } // End of lights loop
 } // End of updateParts
+const smokeSprite = (() => { // Pre-draws one soft, feathered smoke puff to reuse (much nicer than flat discs)
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); // Small hidden canvas
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); // Round gradient from the centre outward
+  gr.addColorStop(0, 'rgba(165,155,145,.9)'); gr.addColorStop(0.5, 'rgba(150,140,130,.4)'); gr.addColorStop(1, 'rgba(150,140,130,0)'); // Dense centre, transparent edge
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; // Paint it and hand back the canvas
+})(); // End of smoke sprite
 function drawParts() { // Paints all sparks, smoke and lights
   fx.globalCompositeOperation = 'source-over'; // Normal drawing for smoke
   for (const p of parts) { // Smoke first (it sits behind the sparks)
     if (p.kind !== 'smoke') continue; // Skip non-smoke
     const r = p.life / p.max; // How much life remains (1 to 0)
-    fx.fillStyle = `rgba(150,140,130,${(r * 0.16).toFixed(3)})`; // Grey, fading out
-    fx.beginPath(); fx.arc(p.x, p.y, p.s * (1 + (1 - r) * 2.2), 0, 6.283); fx.fill(); // Circle that grows as it ages
-  } // End of smoke loop
+    const rr = p.s * (1 + (1 - r) * 2.2) * 1.7; // Puff radius: grows as it ages
+    fx.globalAlpha = r * 0.3; fx.drawImage(smokeSprite, p.x - rr, p.y - rr, rr * 2, rr * 2); // A soft, feathered grey puff that fades out
+  } fx.globalAlpha = 1; // End of smoke loop; restore full opacity
   fx.globalCompositeOperation = 'lighter'; // Additive mixing makes sparks glow
   fx.lineCap = 'round'; // Rounded line ends
   for (const l of lights) { // Draw glows and rings
@@ -866,9 +967,10 @@ function drawFuseHint(t, f, near) { // Pulsing dashed ring around the fuse tip
    SECTION 11 — AQI (live reading + changes from your crackers)
    ===================================================================== */
 const CATS = [ // AQI categories: [upper limit, name, colour]
-  [50, 'Good', '#5fd068'], [100, 'Moderate', '#f2d349'], [150, 'Unhealthy (sensitive)', '#ff9a3c'], // Good to sensitive
-  [200, 'Unhealthy', '#ff5a4d'], [300, 'Very unhealthy', '#b45cff'], [Infinity, 'Hazardous', '#c4344d'] // Worse levels
+  [50, '😊 Good', '#5fd068'], [100, '🙂 Okay', '#f2d349'], [150, '😕 Not great', '#ff9a3c'], // Good to sensitive (with a face kids understand)
+  [200, '😷 Unhealthy', '#ff5a4d'], [300, '🤢 Very bad', '#b45cff'], [Infinity, '😵 Hazardous', '#c4344d'] // Worse levels
 ]; // End of categories
+const compactUI = window.matchMedia('(max-width:560px), (max-height:480px)'); // True on phones (portrait or landscape)
 let lastCat = null; // Remember the last category so we only update colours when it changes
 function renderAQI() { // Updates the AQI card every frame
   if (baseAQI == null) return; // Wait until we know the real AQI
@@ -881,33 +983,34 @@ function renderAQI() { // Updates the AQI card every frame
     lastCat = cat; $('#aqiCat').textContent = cat[1]; // Show the category name
     document.documentElement.style.setProperty('--aqi-color', cat[2]); // Recolour the card
   } // End of category change
-  $('#delta').textContent = `+${Math.round(added)} from your crackers`; // Show how much you added
-  $('#count').textContent = `${bursts} burst`; // Show how many crackers were burst
+  $('#delta').textContent = compactUI.matches ? `+${Math.round(added)} AQI` : `+${Math.round(added)} from crackers`; // Show how much you added (shorter text on small screens)
+  $('#count').textContent = `🎆 ${bursts} lit`; // Show how many crackers were lit
 } // End of renderAQI
 function renderNoise(now, dt) { // Updates the decibel meter and its warnings
   dbLevel += (DB_BASE - dbLevel) * Math.min(1, dt * 1.6); // The level falls back toward the quiet night level
-  const v = Math.round(dbLevel), col = v >= DB_HUMAN ? '#ff4d4d' : v >= DB_DOG ? '#ff9a3c' : v >= 65 ? '#f2d349' : '#5fd068'; // Colour: green, yellow, orange, red
+  const v = Math.round(now < peakUntil ? Math.max(dbLevel, dbPeak) : dbLevel), col = v >= DB_HUMAN ? '#ff4d4d' : v >= DB_DOG ? '#ff9a3c' : v >= 65 ? '#f2d349' : '#5fd068'; // Colour: green, yellow, orange, red
   $('#dbNum').textContent = v + ' dB'; // Show the number
-  $('#dbBar').style.width = Math.max(0, Math.min(100, (dbLevel - 30) / 110 * 100)) + '%'; // Fill the bar (30 dB to 140 dB)
+  $('#dbBar').style.width = Math.max(0, Math.min(100, (v - 30) / 110 * 100)) + '%'; // Fill the bar (30 dB to 140 dB)
   document.documentElement.style.setProperty('--db-color', col); // Apply the colour
   $('#wDog').hidden = !(now < dogUntil); // Show "painful for dogs" while its timer is running
   $('#wHuman').hidden = !(now < humanUntil); // Show "painful for humans" while its timer is running
 } // End of renderNoise
 let lastBlur = -1, lastHaze = -1; // Remember last values to avoid needless style changes
 function renderAtmosphere() { // Makes the sky blurry and hazy as pollution grows
-  const blur = Math.round(Math.min(12, added * 0.08) * 4) / 4; // Blur in pixels (max 12), rounded to quarter-pixels
-  if (blur !== lastBlur) { lastBlur = blur; skyC.style.filter = blur > 0 ? `blur(${blur}px) brightness(${1 - blur * 0.025})` : 'none'; } // Apply blur and slight dimming
-  const hz = Math.round(Math.min(0.72, added / 190) * 50) / 50; // Smog opacity (max 0.72)
+  const blur = Math.round(Math.min(5.5, added * 0.04) * 4) / 4; // Blur in pixels (max 5.5 so the stars stay visible), rounded to quarter-pixels
+  if (blur !== lastBlur) { lastBlur = blur; skyC.style.filter = blur > 0 ? `blur(${blur}px) brightness(${1 - blur * 0.012})` : 'none'; } // Apply blur and very slight dimming
+  $('#clear').hidden = !(added >= 12 || clearing); // Show the 'Clear the air' button once the air is dirty
+  const hz = Math.round(Math.min(0.5, added / 280) * 50) / 50; // Smog opacity (max 0.5)
   if (hz !== lastHaze) { lastHaze = hz; haze.style.opacity = hz; } // Apply smog
 } // End of renderAtmosphere
 async function loadAQI() { // Finds your location and fetches the real AQI
-  const DEFAULT = { lat: 28.6139, lon: 77.209, label: 'New Delhi (default)' }; // Used if location is denied
+  const DEFAULT = { lat: 28.6139, lon: 77.209, label: 'Sample city: Delhi' }; // Used if location is denied (clearly labelled as a sample)
   const pos = await new Promise(res => { // Ask the browser for your location
     if (!navigator.geolocation) return res(null); // No location support
     navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), () => res(null), // Success or failure
       { timeout: 8000, maximumAge: 600000 }); // Wait up to 8 s; accept a 10-minute-old position
   }); // End of location promise
-  const loc = pos ? { ...pos, label: 'Your location' } : DEFAULT; // Use real or default location
+  const loc = pos ? { ...pos, label: 'Near you' } : DEFAULT; // Use real or default location
   $('#loc').textContent = loc.label; // Show the label
   if (pos) fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${loc.lat}&longitude=${loc.lon}&localityLanguage=en`) // Look up the city name
     .then(r => r.json()).then(j => { const n = j.city || j.locality || j.principalSubdivision; if (n) $('#loc').textContent = n; }).catch(() => {}); // Show it if found
@@ -917,7 +1020,7 @@ async function loadAQI() { // Finds your location and fetches the real AQI
     if (typeof j.current?.us_aqi !== 'number') throw new Error('no aqi'); // Make sure we got a number
     baseAQI = Math.round(j.current.us_aqi); // Save the real AQI
   } catch (e) { // Network problem
-    baseAQI = 110; $('#loc').textContent += ' · estimated'; // Use an estimate and say so
+    baseAQI = 110; $('#loc').textContent = 'Sample value'; // Could not fetch: use a sample number and say so
   } // End of try/catch
   shown = baseAQI; // Start the displayed number at the real value
 } // End of loadAQI
@@ -925,10 +1028,11 @@ async function loadAQI() { // Finds your location and fetches the real AQI
 /* =====================================================================
    SECTION 12 — MAIN LOOP (runs about 60 times per second)
    ===================================================================== */
-let last = performance.now(); // Time of the previous frame
+let last = performance.now(), slowT = 0, slowN = 0; // Time of the previous frame, and counters used to detect a slow device
 function frame(now) { // One frame of animation
   const dt = Math.min(0.05, (now - last) / 1000); last = now; // Seconds since last frame (capped)
   const k = dt * 60, t = now / 1000; // Frame-rate scale and time in seconds
+  if (parts.length > 200) { slowT += dt; slowN++; if (slowN >= 90) { if (slowT / slowN > 0.03 && !lite) { lite = true; maxParts = 1500; document.body.classList.add('lite'); } slowT = 0; slowN = 0; } } // During busy moments, if frames take over 30 ms on average (under ~33 fps), switch to lite mode
   drawSky(t, dt); // Draw the night sky
   let fz = null, near = false; // Fuse position and whether the sparkler is on it
   if (staged && staged.ready && !staged.lit && sparklerOn) { // A cracker is waiting to be lit
@@ -938,7 +1042,8 @@ function frame(now) { // One frame of animation
   } // End of ignition check
   for (let i = effects.length - 1; i >= 0; i--) if (!effects[i].update(dt, k)) effects.splice(i, 1); // Run all effects, removing finished ones
   updateParts(dt); // Move sparks
-  added = Math.max(0, added - dt * 0.3); // Pollution slowly clears
+  added = Math.max(0, added - dt * (clearing ? 30 : 2)); // Pollution clears by itself (2 per second), or very fast after pressing 'Clear the air'
+  if (clearing && added <= 0.5) clearing = false; // Done clearing
   fx.clearRect(0, 0, W, H); // Clear the firework layer
   drawParts(); // Draw sparks, smoke, glows
   for (const e of effects) if (e.draw) e.draw(fx); // Effects that draw their own pictures (like the Ladi chain)
@@ -950,7 +1055,13 @@ function frame(now) { // One frame of animation
 
 window.addEventListener('resize', resize); // Re-layout when the window changes size
 resize(); // Initial layout
-loadAQI(); // Start loading the real AQI
+$('#clear').addEventListener('click', e => { // When 'Clear the air' is pressed
+  e.stopPropagation(); ensureAudio(); clearing = true; hiss(1.8, 0.25, 300, 1400); setHint('Fresh air is coming… 🌬️'); // Start fast clearing with a gentle breeze sound
+}); // End of click handler
+$('#start').addEventListener('click', () => { // When the welcome button is pressed
+  ensureAudio(); $('#splash').classList.add('hide'); setTimeout(() => $('#splash').remove(), 700); // Unlock sound and fade out the welcome screen
+  loadAQI(); // Only now ask for the location (the player knows why) and load the AQI
+}); // End of click handler
 requestAnimationFrame(frame); // Start the animation loop
 })(); // End of the wrapper function (runs immediately)
 </script> <!-- End of script -->
