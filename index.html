@@ -327,6 +327,16 @@ const CRACKERS = [ // The master list of all firecrackers
       '<circle class="fuse-tip" cx="31" cy="20" r="3" fill="none"/>' // Fuse tip
     ]) } // End of Ladi
 
+  ,{ id: 'pyro', name: 'Pyro Stick', type: 'pyro', pollution: 6, // A hand-held sparkling stick: light it, then write or draw in the air for 6 seconds
+    opts: { dur: 6 }, // How many seconds it burns once you start drawing
+    art: [ // SVG drawing lines
+      '<rect x="28.5" y="62" width="3" height="56" rx="1.5" fill="#b9bcc4"/>', // Metal handle wire
+      '<rect x="24" y="26" width="12" height="40" rx="3" fill="#3d3a46"/>', // Dark coated stick
+      '<rect x="24" y="34" width="12" height="5" fill="#e1306c"/><rect x="24" y="46" width="12" height="5" fill="#f4c542"/><rect x="24" y="58" width="12" height="4" fill="#3ddc84"/>', // Colour bands (pink, gold, green)
+      '<path d="M30 26 q-4 -8 2 -14" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="32" cy="12" r="3" fill="none"/>' // Fuse tip
+    ] }, // End of Pyro Stick
+
   /* ---------- ADD YOUR OWN CRACKER BELOW (copy one block above, add a comma before it) ----------
   ,{ id: 'mine', name: 'My Cracker', type: 'fountain', pollution: 12,
      opts: { dur: 4, colors: [330, 190], nozzle: [30, 50] },
@@ -578,11 +588,14 @@ for (const c of CRACKERS) { // Make one button for every cracker in the list
    ===================================================================== */
 let staged = null; // The cracker currently in the middle: { def, el, btn, ready, lit }
 let sparklerOn = false; // True while the sparkler replaces the cursor
-const ptr = { x: -999, y: -999, seen: false, touch: false }; // Latest pointer position and whether it is a finger
+const ptr = { x: -999, y: -999, seen: false, touch: false, down: false }; // Latest pointer position, whether it is a finger, and whether the button / finger is pressed
+let pyroState = null; // While the Pyro Stick is in use: its timer and the lines drawn so far (null otherwise)
 let bursts = 0, added = 0, baseAQI = null, shown = 0; // Crackers burst, AQI added by you, real AQI, AQI currently displayed
 function trackPointer(e) { ptr.x = e.clientX; ptr.y = e.clientY; ptr.seen = true; ptr.touch = e.pointerType === 'touch'; } // Remember where the mouse/finger is
 window.addEventListener('pointermove', trackPointer); // Update when moving
-window.addEventListener('pointerdown', trackPointer); // Update when pressing
+window.addEventListener('pointerdown', e => { trackPointer(e); if (!e.target.closest('#aqi, #ctl, #splash')) ptr.down = true; }); // Update when pressing, and remember that we are pressed (unless the press is on a button of the page)
+window.addEventListener('pointerup', () => { ptr.down = false; }); // Released
+window.addEventListener('pointercancel', () => { ptr.down = false; }); // The phone cancelled the touch
 function tip() { return { x: ptr.x, y: ptr.touch ? ptr.y - 70 : ptr.y }; } // Sparkler tip: on touch screens it floats above the finger so you can see it
 function setHint(msg) { // Shows or hides the instruction text
   const h = $('#hint'); // Find the hint pill
@@ -605,6 +618,7 @@ function placeStaged(animate) { // Moves the chosen cracker to its target place
 } // End of placeStaged
 function selectCracker(btn, def) { // Called when a cracker in the tray is tapped
   if (staged && staged.lit) return; // Ignore taps while one is burning
+  if (pyroState) return; // Ignore taps while the Pyro Stick is being used
   ensureAudio(); // Make sure sound is unlocked
   if (staged) dropStaged(); // If another cracker was waiting, put it back
   const r = btn.querySelector('svg').getBoundingClientRect(); // Where the icon is now
@@ -747,7 +761,8 @@ function drawParts() { // Paints all sparks, smoke and lights
    ===================================================================== */
 function shell(x, y, style, hue, loud = 1, size = 1) { // Explodes a firework at (x,y). style = peony | ring | willow | crossette; size scales how far sparks fly
   const first = parts.length; // Remember where this shell's sparks start in the list
-  const n = style === 'ring' ? 80 : 130; // Number of sparks
+  size = Math.min(size, Math.max(1, W / 260)); // Never let a burst grow much wider than the screen (small phones get smaller bursts)
+  const n = Math.floor((style === 'ring' ? 80 : 130) * Math.min(1.8, Math.sqrt(size))); // Number of sparks (bigger bursts get more sparks so they stay full)
   const hue2 = (hue + 150 + rand(0, 60)) % 360; // A second contrasting colour
   if (style === 'peony') { // Classic round burst
     for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = 1 + Math.sqrt(Math.random()) * 5.2; // Random direction and speed
@@ -779,12 +794,22 @@ const SHELLS = ['peony', 'ring', 'willow', 'crossette', 'peony']; // Default lis
 function igniteAnimation(onDone) { // Fuse-burning sequence before the main effect
   const s = staged; s.lit = true; s.el.classList.add('lit'); // Mark as lit and make it shiver
   setHint(null); // Hide the hint text
-  hiss(0.7, 0.35, 3500, 7000, 'highpass'); // Fuse sizzle sound
+  const BURN = 1.4; // How many seconds the fuse takes to burn
+  hiss(BURN, 0.35, 3500, 7000, 'highpass'); // Fuse sizzle sound for the whole burn
+  const fuse = s.el.querySelector('path[stroke="#d9c48a"]'); // The fuse drawing (the thin cream-coloured wire in the artwork), if the cracker has one
+  const total = fuse ? fuse.getTotalLength() : 0; // How long the fuse is, in drawing units
   effects.push({ t: 0, update(dt) { // Add a small timed effect
-    this.t += dt; const f = fuseScreen(); // Count time; find the fuse tip
-    for (let i = 0; i < 4; i++) spark(f.x, f.y, rand(-2.5, 2.5), rand(-3.5, 0.5), { life: rand(0.2, 0.5), h: rand(30, 55), l: 70, g: 0.12, s: 1.4 }); // Little sparks from the fuse
-    glow(f.x, f.y, 50, 40, 0.8, 4); // Tiny glow at the fuse tip
-    if (this.t > 0.7) { s.el.classList.remove('lit'); onDone(); return false; } // After 0.7 s stop shivering and start the real effect
+    this.t += dt; const left = Math.max(0, 1 - this.t / BURN); // Time passed, and the fraction of fuse still unburnt (1 = whole, 0 = gone)
+    let f; // Where the glowing end of the fuse is on screen
+    if (fuse) { // If we can see the fuse: shrink it
+      fuse.style.strokeDasharray = `${left * total} ${total * 2}`; // Only draw the first part of the fuse; the burnt part (the tip end) disappears
+      fuse.style.opacity = left < 0.02 ? 0 : 1; // Hide the last tiny dot when it is fully burnt
+      const p = fuse.getPointAtLength(left * total), m = fuse.getScreenCTM(); // The point where the fire is now, and the matrix that converts drawing units to screen pixels
+      f = m ? new DOMPoint(p.x, p.y).matrixTransform(m) : fuseScreen(); // Fire position on screen (fallback: the original tip)
+    } else f = fuseScreen(); // Crackers without a drawn fuse just use the marked tip
+    for (let i = 0; i < 4; i++) spark(f.x, f.y, rand(-2.5, 2.5), rand(-3.5, 0.5), { life: rand(0.2, 0.5), h: rand(30, 55), l: 70, g: 0.12, s: 1.4 }); // Little sparks from the burning end
+    glow(f.x, f.y, 50, 40, 0.8, 4); // Tiny glow at the burning end
+    if (this.t > BURN) { s.el.classList.remove('lit'); onDone(); return false; } // When the fuse is gone, stop shivering and start the real effect
     return true; // Otherwise keep running
   } }); // End of fuse effect
 } // End of igniteAnimation
@@ -821,7 +846,7 @@ const PRESETS = { // The collection of behaviours
     const o = c.opts, R = staged.el.getBoundingClientRect(), S = svgPt(R, o.launch[0], o.launch[1]); // Settings, box, launch point
     const shells = o.shells ?? SHELLS; // Shell styles allowed
     staged.el.style.opacity = 0; // Hide the cracker picture (the rocket "leaves")
-    const ty = H * rand(0.14, 0.32); // Height where it will explode
+    const ty = H * rand(0.24, 0.4); // Height where it will explode (a bit lower so the bigger bursts stay on screen)
     hiss(1.5, 0.5, 500, 2600); // Whoosh sound
     bang(0.9, 0.8); flashScreen(0.35); shake(true); glow(S.x, S.y, 320, 40, 1.2, 2); ring(S.x, S.y, 700); // BIG launch sparkle: bang, flash, shake, light and ring
     for (let i = 0; i < 160; i++) { const a = Math.random() * 6.283, v = rand(1.5, 9); // Burst of sparks in every direction
@@ -834,10 +859,10 @@ const PRESETS = { // The collection of behaviours
       glow(this.x, this.y, 60, 35, 0.5, 5); // Light around the rocket
       if (this.y <= ty || this.vy > -3) { // Reached its height: explode!
         const hue = Math.floor(rand(0, 360)), x = this.x, y = this.y; // Random colour and position
-        shell(x, y, pick(shells), hue, 1); shake(false); pollute(c.pollution * 0.5); // Main burst
+        shell(x, y, pick(shells), hue, 1, 1.9); shake(false); pollute(c.pollution * 0.5); // Main burst (1.9x wider than a normal one)
         const extra = o.extra ?? 5; // How many follow-up bursts
         for (let i = 0; i < extra; i++) setTimeout(() => { // Follow-up bursts around the first one
-          shell(x + rand(-190, 190), y + rand(-60, 110), pick(shells), (hue + (i + 1) * 360 / (extra + 1)) % 360, 0.8, 1.1); // Each burst gets a different colour around the colour wheel
+          shell(x + rand(-1, 1) * Math.min(340, W * 0.3), y + rand(-60, 130), pick(shells), (hue + (i + 1) * 360 / (extra + 1)) % 360, 0.8, 1.6); // Bigger bursts spread much wider across the sky, each in a different colour around the colour wheel
           pollute(c.pollution * 0.5 / extra); // Adds more AQI
         }, 250 + i * 240); // Staggered timing
         setTimeout(() => finish(), 400 + extra * 240 + 900); // Finish after the last burst
@@ -867,28 +892,35 @@ const PRESETS = { // The collection of behaviours
     const el = staged.el, bw = R.width, bh = R.height; // The cracker element and its size
     el.style.transition = 'none'; el.style.transformOrigin = `${o.center[0] / 60 * 100}% ${o.center[1] / 120 * 100}%`; // Move instantly, and rotate around the wheel's centre
     whirr(dur); hiss(dur, 0.25, 2200, 4500); crackle(60, dur, 0.15); // Buzz, hiss and crackle sounds
-    effects.push({ t: 0, rot: 0, x: C0.x, y: C0.y, dir: -Math.PI / 2, turn: 0, boost: 1, update(dt, k) { // Running effect: x,y is the wheel's centre, dir its heading
+    effects.push({ t: 0, rot: 0, x: C0.x, y: C0.y, dir: -Math.PI / 2, turn: 0, boost: 1, kick: 1, update(dt, k) { // Running effect: x,y is the wheel's centre, dir its heading, kick is extra speed gained from bouncing
       this.t += dt; const life = Math.max(0, Math.min(1, (dur - this.t) / (dur * 0.3))); // 1 while burning strongly, fades to 0 in the last 30%
-      this.turn -= dt; if (this.turn <= 0) { this.dir += rand(-2, 2); this.turn = rand(0.1, 0.3); this.boost = Math.random() < 0.25 ? 1.8 : 1; } // Every fraction of a second: swerve randomly, sometimes dash
-      const v = 660 * this.boost * (0.25 + 0.75 * life), vx = Math.cos(this.dir) * v, vy = Math.sin(this.dir) * v; // Speed in pixels per second (slows as it dies)
+      this.turn -= dt; if (this.turn <= 0) { this.dir += rand(-2.4, 2.4); this.turn = rand(0.07, 0.2); this.boost = Math.random() < 0.3 ? 2.2 : 1; } // Every fraction of a second: swerve sharply, and often dash
+      this.kick += (1 - this.kick) * Math.min(1, dt * 2.5); // Extra speed gained from a bounce slowly fades back to normal
+      const v = 1000 * this.boost * this.kick * (0.25 + 0.75 * life), vx = Math.cos(this.dir) * v, vy = Math.sin(this.dir) * v; // Speed in pixels per second (about 50% faster than before; slows as it dies)
       this.x += vx * dt; this.y += vy * dt; // Move
       const m = rad + 12; // Keep the whole wheel on screen
-      if (this.x < m) { this.x = m; this.dir = Math.PI - this.dir; } else if (this.x > W - m) { this.x = W - m; this.dir = Math.PI - this.dir; } // Bounce off the left/right edges
-      if (this.y < m + 80) { this.y = m + 80; this.dir = -this.dir; } else if (this.y > H - m) { this.y = H - m; this.dir = -this.dir; } // Bounce off the top/bottom edges
-      this.rot += (6 + 28 * life) * dt; // Spins twice as fast now, fastest while strong
-      el.style.left = (this.x - o.center[0] / 60 * bw) + 'px'; el.style.top = (this.y - o.center[1] / 120 * bh) + 'px'; // Move the picture so its centre follows the wheel
+      let hit = false; // Did it bounce off an edge this frame?
+      if (this.x < m) { this.x = m; this.dir = Math.PI - this.dir; hit = true; } else if (this.x > W - m) { this.x = W - m; this.dir = Math.PI - this.dir; hit = true; } // Bounce off the left/right edges
+      if (this.y < m + 80) { this.y = m + 80; this.dir = -this.dir; hit = true; } else if (this.y > H - m) { this.y = H - m; this.dir = -this.dir; hit = true; } // Bounce off the top/bottom edges
+      if (hit) { // Every bounce makes it even bouncier
+        this.kick = 1.7; this.dir += rand(-0.5, 0.5); thump(0.3); // Speed boost, a slightly random new direction and a "boing" sound
+        for (let q = 0; q < 16; q++) { const a = Math.random() * 6.283, sp = rand(2, 7); spark(this.x, this.y, Math.cos(a) * sp, Math.sin(a) * sp, { life: rand(0.3, 0.7), h: pick(colors), g: 0.1, d: 0.95, s: 2.2 }); } // A little burst of sparks at the bounce
+      } // End of bounce
+      const cy = this.y - Math.abs(Math.sin(this.t * 11)) * 55 * (0.3 + 0.7 * life); // Extra up-and-down hopping, like a bouncing ball
+      this.rot += (6 + 28 * life) * dt; // Spins fast, fastest while strong
+      el.style.left = (this.x - o.center[0] / 60 * bw) + 'px'; el.style.top = (cy - o.center[1] / 120 * bh) + 'px'; // Move the picture so its centre follows the wheel (including the hop)
       el.style.transform = `rotate(${this.rot}rad)`; // Rotate the picture (flat spin, no flipping)
       for (let j = 0; j < 6; j++) { // Six spark jets around the rim
         const a = this.rot + j * 1.047, n = Math.ceil(3 * life + Math.random()); // Angle of this jet; more sparks per frame for extra intensity
-        for (let q = 0; q < n; q++) spark(this.x + Math.cos(a) * rad * 0.9, this.y + Math.sin(a) * rad * 0.9, // Start on the rim
+        for (let q = 0; q < n; q++) spark(this.x + Math.cos(a) * rad * 0.9, cy + Math.sin(a) * rad * 0.9, // Start on the rim
           -Math.sin(a) * (5 + 4 * life) + Math.cos(a) * 1.5 + vx / 60 * 0.5 + rand(-1, 1), Math.cos(a) * (5 + 4 * life) + Math.sin(a) * 1.5 + vy / 60 * 0.5 + rand(-1, 1), // Fly off sideways (tangent), a bit outward, plus the wheel's own motion
           { life: rand(0.5, 1.1), h: pick(colors), l: 62, g: 0.1, d: 0.965, s: rand(1.8, 3), tw: true }); // Bigger, longer-lived coloured sparks
       } // End of jets
-      glow(this.x, this.y, 230, pick(colors), 0.7 * life, 6); // Big coloured light around the wheel
-      if (Math.random() < 0.2 * k) smoke(this.x, this.y, 1, 0.8); // Smoke trail
+      glow(this.x, cy, 230, pick(colors), 0.7 * life, 6); // Big coloured light around the wheel
+      if (Math.random() < 0.2 * k) smoke(this.x, cy, 1, 0.8); // Smoke trail
       pollute(c.pollution / dur * dt); // Slowly add AQI
       if (this.t >= dur) { // Burnt out
-        bang(0.8, 0.8); shell(this.x, this.y, 'peony', Math.floor(rand(0, 360)), 0.7, 1.3); finish(); return false; // Final pop with a small firework, then finish
+        bang(0.8, 0.8); shell(this.x, cy, 'peony', Math.floor(rand(0, 360)), 0.7, 1.3); finish(); return false; // Final pop with a small firework, then finish
       } // End of ending
       return true; // Keep going
     } }); // End of effect
@@ -958,7 +990,7 @@ const PRESETS = { // The collection of behaviours
       wait -= dt; // Count down to next shot
       if (shot < balls && wait <= 0) { // Time to fire a ball
         const hue = colors[shot % colors.length]; shot++; wait = rand(0.16, 0.3); // Choose its colour and schedule the next (much faster now)
-        flying.push({ x: N.x, y: N.y, vx: rand(-1.2, 1.2), vy: -rand(9, 12), hue, top: H * rand(0.15, 0.4) }); // New flying ball
+        flying.push({ x: N.x, y: N.y, vx: rand(-3.6, 3.6), vy: -rand(9, 12), hue, top: H * rand(0.18, 0.45) }); // New flying ball (it flies sideways much more, so the balls fan out wide)
         thump(0.5); crackle(6, 0.2, 0.3); glow(N.x, N.y, 90, hue, 0.9, 4); // Launch sound and light
         for (let i = 0; i < 12; i++) spark(N.x, N.y, rand(-2, 2), -rand(1, 5), { life: rand(0.2, 0.5), h: hue, g: 0.1, s: 1.6 }); // Muzzle sparks
       } // End of firing
@@ -967,13 +999,67 @@ const PRESETS = { // The collection of behaviours
         spark(b.x, b.y, rand(-0.4, 0.4), rand(0.5, 1.5), { life: rand(0.3, 0.7), h: b.hue, g: 0.03, s: 3 }); // Thicker coloured tail
         glow(b.x, b.y, 50, b.hue, 0.5, 5); // Glow around the ball
         if (b.y <= b.top || b.vy > -2.5) { // Reached its top: pop into a small firework
-          shell(b.x, b.y, pick(['peony', 'ring', 'crossette']), b.hue, 0.8, 1.5); pollute(c.pollution / balls); flying.splice(i, 1); // Burst, add AQI, remove ball
+          shell(b.x, b.y, pick(['peony', 'ring', 'crossette']), b.hue, 0.8, 2); pollute(c.pollution / balls); flying.splice(i, 1); // Burst, add AQI, remove ball
         } // End of pop
       } // End of ball loop
       if (shot >= balls && flying.length === 0) { setTimeout(() => finish(), 900); return false; } // All shot and burst: finish
       return true; // Keep going
     } }); // End of effect
-  } // End of candle
+  }, // End of candle
+
+  pyro(c) { // Pyro Stick: once lit, your pointer becomes a glowing stick that writes / draws in the air for a few seconds
+    const s = staged, dur = c.opts.dur ?? 6; // The picked stick, and how long it burns
+    s.el.classList.add('gone'); setTimeout(() => s.el.remove(), 600); // The stick is "picked up": fade the picture away
+    staged = null; document.documentElement.style.removeProperty('--hintb'); // No cracker is waiting any more
+    const P = pyroState = { btn: s.btn, t: 0, started: false, dur, strokes: [], cur: null, hue: rand(0, 360), fade: 0, shown: '' }; // Timer, drawn lines, current line, starting colour, fade-out timer
+    setHint(ptr.touch ? 'Drag your finger to write or draw ✍️ It burns for 6 seconds once you start!' : 'Hold the mouse button and move to write or draw ✍️ It burns for 6 seconds once you start!'); // Tell the player how it works
+    effects.push({ // The running effect
+      update(dt) { // Runs every frame
+        const T = tip(); // Where the glowing tip is
+        if (!P.started && ptr.down) { // The first press starts the 6-second timer
+          P.started = true; hiss(dur, 0.3, 2500, 5200); // Start burning with a fizzing sound
+        } // End of start
+        if (P.started && P.t < dur) { // The stick is burning
+          P.t += dt; // Time passes
+          const left = Math.max(0, dur - P.t), msg = `✍️ ${left.toFixed(1)}s left`; // Seconds remaining
+          if (msg !== P.shown) { P.shown = msg; setHint(msg); } // Show the countdown (only when the text changes)
+          if (ptr.down) { // Pressed: add to the line being drawn
+            if (!P.cur) { P.cur = []; P.strokes.push(P.cur); } // Start a new line (this allows lifting the "pen" between letters)
+            const last = P.cur[P.cur.length - 1]; // The previous point
+            if (!last || Math.hypot(T.x - last.x, T.y - last.y) > 1.5) P.cur.push({ x: T.x, y: T.y, h: (P.hue + P.t * 70) % 360 }); // Add a point (its colour slowly changes along the line)
+          } else P.cur = null; // Not pressed: the next press begins a new line
+          for (let i = 0; i < 6; i++) { const a = Math.random() * 6.283, v = rand(1, 5); // Lots of sparks fly off the tip
+            spark(T.x, T.y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.25, 0.7), h: (P.hue + P.t * 70 + rand(-30, 30)) % 360, l: 70, g: 0.08, d: 0.95, s: 1.6, tw: true }); } // Coloured sparks
+          glow(T.x, T.y, 90, (P.hue + P.t * 70) % 360, 0.6, 6); // Coloured glow around the tip
+          pollute(c.pollution / dur * dt); // A little pollution while it burns
+          if (P.t >= dur) { // Burnt out
+            sparklerOn = false; document.body.classList.remove('sparkler'); stopSparklerSound(); P.cur = null; ptr.down = false; // The stick is finished: normal cursor again
+            setHint('The stick burnt out! 🎇'); // Tell the player
+          } // End of burn-out
+        } else if (P.started) { // The stick is out: the drawing fades away
+          P.fade += dt; // Fade timer
+          if (P.fade >= 1.5) { // Fully faded
+            P.btn.classList.remove('picked'); bursts++; praise(); setHint('Beautiful! Pick another one 🎆'); pyroState = null; return false; // Give the tray back and finish
+          } // End of fade
+        } // End of burning / fading
+        return true; // Keep going
+      }, // End of update
+      draw(g) { // Paints the lines on the fireworks canvas
+        const a = P.fade > 0 ? 1 - P.fade / 1.5 : 1; // Opacity: full while burning, fading after
+        g.save(); g.globalCompositeOperation = 'lighter'; g.lineCap = 'round'; g.lineJoin = 'round'; // Glowing, rounded lines
+        for (const st of P.strokes) { // Every line drawn so far
+          if (st.length === 1) { g.fillStyle = `hsla(${st[0].h},100%,75%,${a})`; g.beginPath(); g.arc(st[0].x, st[0].y, 3, 0, 6.283); g.fill(); continue; } // A single tap is a dot
+          for (let i = 1; i < st.length; i++) { // Draw the line piece by piece (so its colour can change)
+            g.strokeStyle = `hsla(${st[i].h},100%,55%,${0.22 * a})`; g.lineWidth = 13; // Wide soft glow
+            g.beginPath(); g.moveTo(st[i - 1].x, st[i - 1].y); g.lineTo(st[i].x, st[i].y); g.stroke(); // The glow piece
+            g.strokeStyle = `hsla(${st[i].h},100%,88%,${0.95 * a})`; g.lineWidth = 3.5; // Bright thin core
+            g.beginPath(); g.moveTo(st[i - 1].x, st[i - 1].y); g.lineTo(st[i].x, st[i].y); g.stroke(); // The core piece
+          } // End of pieces
+        } // End of lines
+        g.restore(); // Restore drawing state
+      } // End of draw
+    }); // End of effect
+  } // End of pyro
 }; // End of presets
 
 function launch(c) { // Starts the main effect of a cracker once its fuse has burnt
