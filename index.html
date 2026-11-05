@@ -123,25 +123,29 @@
                  or 'custom' (you write your own run(api) function)
      pollution : how many AQI points it adds
      opts      : settings for the preset (see the examples below)
+     scale     : (optional) draw the cracker bigger/smaller in the middle, e.g. 1.5
      art       : array of SVG lines, drawn inside a 60 x 120 box.
                  Include ONE shape with class="fuse-tip" where the fuse ends.
    Copy any entry, change the values, and your cracker appears in the tray!
    ===================================================================== */
 const CRACKERS = [ // The master list of all firecrackers
   { id: 'anar', name: 'Anar', type: 'fountain', pollution: 14, // Flowerpot: a gold fountain
-    opts: { dur: 4.6, colors: [40], nozzle: [30, 52] }, // Lasts 4.6 s, gold hue, nozzle position inside the art
+    opts: { dur: 5.5, colors: [40, 0, 120, 200, 300, 50], nozzle: [30, 52], power: 1.5, spread: 4.2, rate: 16, glitter: 0.12 }, // 5.5 s, many colours, taller (power) and wider (spread) spray, spark rate, mid-air glitter bursts
     art: [ // SVG drawing lines
+      '<g transform="translate(30 0) scale(1.4 1) translate(-30 0)">', // Start of a group that makes the cracker 40% wider
       '<polygon points="14,118 46,118 42,52 18,52" fill="#d6402b"/>', // Red conical body
       '<polygon points="17.3,64 42.7,64 43.2,72 16.8,72" fill="#f4c542"/>', // Upper gold band
       '<polygon points="15.3,96 44.7,96 45.2,104 14.8,104" fill="#f4c542"/>', // Lower gold band
       '<circle cx="30" cy="85" r="8" fill="#f4c542"/><circle cx="30" cy="85" r="4.5" fill="#d6402b"/>', // Gold badge
       '<ellipse cx="30" cy="52" rx="12" ry="4" fill="#2b1a12"/>', // Dark nozzle opening
       '<path d="M30 52 q4 -14 -2 -24" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
-      '<circle class="fuse-tip" cx="28" cy="28" r="3" fill="none"/>' // Marks where the sparkler must touch
+      '<circle class="fuse-tip" cx="28" cy="28" r="3" fill="none"/>', // Marks where the sparkler must touch
+      '</g>' // End of the widening group
     ] }, // End of Anar
   { id: 'rainbow', name: 'Rainbow', type: 'fountain', pollution: 15, // Colourful fountain
-    opts: { dur: 5, colors: [0, 40, 120, 200, 280, 320], nozzle: [30, 50] }, // Many colours at once
+    opts: { dur: 6, colors: [0, 30, 60, 120, 180, 220, 280, 320], nozzle: [30, 50], power: 1.6, spread: 5, rate: 18, glitter: 0.15 }, // 6 s, whole rainbow of colours, big wide spray, lots of glitter
     art: [ // SVG drawing lines
+      '<g transform="translate(30 0) scale(1.4 1) translate(-30 0)">', // Start of a group that makes the cracker 40% wider
       '<polygon points="12,118 48,118 43,50 17,50" fill="#3b2a6e"/>', // Purple body
       '<polygon points="16.4,62 43.6,62 44.4,70 15.6,70" fill="#ff4d4d"/>', // Red stripe
       '<polygon points="15.2,74 44.8,74 45.6,82 14.4,82" fill="#ffd23f"/>', // Yellow stripe
@@ -149,10 +153,11 @@ const CRACKERS = [ // The master list of all firecrackers
       '<polygon points="12.8,98 47.2,98 48,106 12,106" fill="#4da3ff"/>', // Blue stripe
       '<ellipse cx="30" cy="50" rx="13" ry="4" fill="#150f2b"/>', // Nozzle
       '<path d="M30 50 q-5 -12 3 -22" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
-      '<circle class="fuse-tip" cx="33" cy="28" r="3" fill="none"/>' // Fuse tip
+      '<circle class="fuse-tip" cx="33" cy="28" r="3" fill="none"/>', // Fuse tip
+      '</g>' // End of the widening group
     ] }, // End of Rainbow
   { id: 'rocket', name: 'Rocket', type: 'rocket', pollution: 18, // Flies up and explodes
-    opts: { launch: [30, 50], shells: ['peony', 'ring', 'willow', 'crossette'], extra: 2 }, // Shell styles and number of follow-up bursts
+    opts: { launch: [30, 50], shells: ['peony', 'ring', 'willow', 'crossette'], extra: 5 }, // Shell styles and number of follow-up bursts (each a different colour)
     art: [ // SVG drawing lines
       '<rect x="28.5" y="74" width="3" height="44" fill="#c8a86a"/>', // Wooden stick
       '<polygon points="20,30 40,30 30,6" fill="#d6402b"/>', // Red nose cone
@@ -163,7 +168,7 @@ const CRACKERS = [ // The master list of all firecrackers
       '<circle class="fuse-tip" cx="46" cy="88" r="3" fill="none"/>' // Fuse tip
     ] }, // End of Rocket
   { id: 'candle', name: 'Roman Candle', type: 'candle', pollution: 17, // Shoots coloured fireballs one by one
-    opts: { balls: 7, colors: [0, 50, 120, 200, 290], nozzle: [30, 24] }, // 7 balls, their colours, where they leave the tube
+    opts: { balls: 14, colors: [0, 50, 120, 200, 290, 330], nozzle: [30, 24] }, // 14 balls, their colours, where they leave the tube
     art: [ // SVG drawing lines
       '<rect x="20" y="24" width="20" height="94" rx="3" fill="#1f6f5c"/>', // Green tube
       '<rect x="20" y="40" width="20" height="6" fill="#f4c542"/>', // Gold band 1
@@ -174,7 +179,7 @@ const CRACKERS = [ // The master list of all firecrackers
       '<circle class="fuse-tip" cx="50" cy="102" r="3" fill="none"/>' // Fuse tip
     ] }, // End of Roman Candle
   { id: 'bomb', name: 'Atom Bomb', type: 'bomb', pollution: 26, // Very loud bang
-    opts: { power: 1 }, // Full power
+    scale: 1.5, opts: { power: 1.3 }, // Drawn 1.5x bigger on screen, with a bigger blast
     art: [ // SVG drawing lines
       '<rect x="13" y="44" width="34" height="62" rx="6" fill="#c0392b"/>', // Red body
       '<rect x="13" y="44" width="34" height="8" rx="3" fill="#f1c40f"/><rect x="13" y="98" width="34" height="8" rx="3" fill="#f1c40f"/>', // Gold caps
@@ -433,7 +438,7 @@ function setHint(msg) { // Shows or hides the instruction text
 } // End of setHint
 function stagedTarget() { // Works out where the chosen cracker should sit (bottom centre)
   const trayH = $('#tray').offsetHeight; // Height of the tray
-  let w = Math.min(96, W * 0.26); // Cracker width: up to 96px, or 26% of screen
+  let w = Math.min(96, W * 0.26) * (staged?.def.scale ?? 1); // Cracker width: up to 96px, or 26% of screen (times the cracker's own 'scale' if it has one)
   const maxH = H * 0.44; if (w * 2 > maxH) w = maxH / 2; // Never taller than 44% of the screen
   const h = w * 2; // Height is double the width
   return { w, h, left: W / 2 - w / 2, top: H - trayH - 6 - h }; // Centred horizontally, just above the tray
@@ -561,7 +566,8 @@ function drawParts() { // Paints all sparks, smoke and lights
 /* =====================================================================
    SECTION 8 — FIREWORK SHELLS (the big colourful bursts)
    ===================================================================== */
-function shell(x, y, style, hue, loud = 1) { // Explodes a firework at (x,y). style = peony | ring | willow | crossette
+function shell(x, y, style, hue, loud = 1, size = 1) { // Explodes a firework at (x,y). style = peony | ring | willow | crossette; size scales how far sparks fly
+  const first = parts.length; // Remember where this shell's sparks start in the list
   const n = style === 'ring' ? 80 : 130; // Number of sparks
   const hue2 = (hue + 150 + rand(0, 60)) % 360; // A second contrasting colour
   if (style === 'peony') { // Classic round burst
@@ -580,7 +586,8 @@ function shell(x, y, style, hue, loud = 1) { // Explodes a firework at (x,y). st
     for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283 + rand(-0.1, 0.1), v = rand(3, 4.2); // 12 spokes
       spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(1.2, 1.5), h: hue, g: 0.05, d: 0.97, s: 2.2, split: 1 }); } // Flagged to split later
   } // End of style choice
-  glow(x, y, 240, hue, 1); flashScreen(0.1 * loud); // Coloured light and a faint screen flash
+  if (size !== 1) for (let i = first; i < parts.length; i++) { parts[i].vx *= size; parts[i].vy *= size; } // Bigger shells: sparks fly faster, so the burst spreads wider
+  glow(x, y, 240 * size, hue, 1); flashScreen(0.1 * loud); // Coloured light and a faint screen flash
   bang(0.7 * loud, 1.1); crackle(26, 1.1, 0.35 * loud); // Boom plus crackling
   smoke(x, y, 5, 1.2); // Leave some smoke
 } // End of shell
@@ -606,18 +613,24 @@ function igniteAnimation(onDone) { // Fuse-burning sequence before the main effe
 const PRESETS = { // The collection of behaviours
   fountain(c) { // Sparks shoot upward like a flowerpot
     const o = c.opts, R = staged.el.getBoundingClientRect(), N = svgPt(R, o.nozzle[0], o.nozzle[1]); // Settings, cracker box, nozzle screen position
-    const dur = o.dur ?? 4.5, colors = o.colors ?? [40]; // Duration and colour list
+    const dur = o.dur ?? 4.5, colors = o.colors ?? [40], power = o.power ?? 1, spread = o.spread ?? 1.6, rate = o.rate ?? 7, glit = o.glitter ?? 0; // Duration, colours, height multiplier, sideways spread, sparks per frame, glitter chance
     hiss(dur, 0.55, 1800, 700); crackle(30, dur - 0.4, 0.12); // Whoosh and crackle sounds
     effects.push({ t: 0, update(dt, k) { // Add the running effect
       this.t += dt; // Advance time
       const ramp = Math.min(1, this.t / 0.4) * Math.min(1, (dur - this.t) / 0.8); // Fade in at start, fade out at end
-      const n = Math.floor(7 * ramp + Math.random()); // Sparks to create this frame
+      const n = Math.floor(rate * ramp + Math.random()); // Sparks to create this frame
       for (let i = 0; i < n; i++) { // Create each spark
         const h = pick(colors); // Choose one of the colours
-        spark(N.x + rand(-4, 4), N.y, rand(-1.6, 1.6), -rand(6, 12) * (0.6 + 0.4 * ramp), // Shoot up with random sideways drift
-          { life: rand(1, 1.8), h, l: colors.length > 1 ? 58 : 62, g: 0.13, d: 0.988, tw: true }); // Gravity pulls them back down
+        spark(N.x + rand(-6, 6), N.y, rand(-spread, spread), -rand(6, 12) * power * (0.6 + 0.4 * ramp), // Shoot up (taller with power) with wide sideways drift
+          { life: rand(1.1, 2.1), h, l: colors.length > 1 ? 58 : 62, g: 0.13, d: 0.988, s: rand(1.4, 2.6), tw: true }); // Gravity pulls them back down; thicker twinkling sparks
       } // End of spark loop
-      glow(N.x, N.y - 40, 170, pick(colors), 0.55 * ramp, 6); // Light on the ground around it
+      glow(N.x, N.y - 60, 170 + 90 * power, pick(colors), 0.6 * ramp, 6); // Bigger coloured light around the fountain
+      if (glit && Math.random() < glit * k * ramp) { // Now and then, a glittering mini-burst pops in mid-air
+        const gx = N.x + rand(-1, 1) * 45 * spread, gy = N.y - rand(100, 160) * power, gh = pick(colors); // Where it pops and its colour
+        for (let j = 0; j < 22; j++) { const a = Math.random() * 6.283, v = rand(0.8, 3.4); // Random direction and speed
+          spark(gx, gy, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.5, 1), h: gh, l: 75, g: 0.05, d: 0.96, s: 1.6, tw: true }); } // Twinkling glitter
+        glow(gx, gy, 80, gh, 0.7, 5); crackle(5, 0.2, 0.25); // Little light and crackle sound
+      } // End of glitter
       if (Math.random() < 0.3 * k) smoke(N.x, N.y - 30, 1); // Occasional smoke
       pollute(c.pollution / dur * dt); // Slowly add AQI while it burns
       if (this.t >= dur) { finish(); return false; } // Done: finish
@@ -631,6 +644,10 @@ const PRESETS = { // The collection of behaviours
     staged.el.style.opacity = 0; // Hide the cracker picture (the rocket "leaves")
     const ty = H * rand(0.14, 0.32); // Height where it will explode
     hiss(1.5, 0.5, 500, 2600); // Whoosh sound
+    bang(0.9, 0.8); flashScreen(0.35); shake(true); glow(S.x, S.y, 320, 40, 1.2, 2); ring(S.x, S.y, 700); // BIG launch sparkle: bang, flash, shake, light and ring
+    for (let i = 0; i < 160; i++) { const a = Math.random() * 6.283, v = rand(1.5, 9); // Burst of sparks in every direction
+      spark(S.x, S.y, Math.cos(a) * v, Math.sin(a) * v - 2, { life: rand(0.5, 1.3), h: pick([40, 50, 20, 190, 320]), l: 68, g: 0.1, d: 0.96, s: rand(1.4, 2.6), tw: true }); } // Multi-coloured launch sparkles
+    crackle(30, 0.8, 0.4); smoke(S.x, S.y, 8, 1.4); // Crackle sound and smoke at the launch pad
     effects.push({ x: S.x, y: S.y, vy: -9.5, sw: Math.random() * 6, update(dt, k) { // Flying rocket
       this.sw += dt * 14; this.x += Math.sin(this.sw) * 0.4 * k; this.y += this.vy * k; this.vy *= Math.pow(0.992, k); // Wobble sideways, move up, slow slightly
       for (let i = 0; i < 3; i++) spark(this.x + rand(-1.5, 1.5), this.y + 8, rand(-0.5, 0.5), rand(1, 2.5), { life: rand(0.35, 0.7), h: rand(25, 50), l: 65, g: 0.03, s: 1.7 }); // Fiery tail
@@ -639,11 +656,12 @@ const PRESETS = { // The collection of behaviours
       if (this.y <= ty || this.vy > -3) { // Reached its height: explode!
         const hue = Math.floor(rand(0, 360)), x = this.x, y = this.y; // Random colour and position
         shell(x, y, pick(shells), hue, 1); shake(false); pollute(c.pollution * 0.5); // Main burst
-        for (let i = 0; i < (o.extra ?? 2); i++) setTimeout(() => { // Follow-up bursts nearby
-          shell(x + rand(-140, 140), y + rand(-20, 70), pick(shells), (hue + rand(60, 240)) % 360, 0.7); // A smaller extra burst
-          pollute(c.pollution * 0.25); // Adds more AQI
-        }, 300 + i * 260); // Staggered timing
-        setTimeout(() => finish(), 1500); // Finish shortly after
+        const extra = o.extra ?? 5; // How many follow-up bursts
+        for (let i = 0; i < extra; i++) setTimeout(() => { // Follow-up bursts around the first one
+          shell(x + rand(-190, 190), y + rand(-60, 110), pick(shells), (hue + (i + 1) * 360 / (extra + 1)) % 360, 0.8, 1.1); // Each burst gets a different colour around the colour wheel
+          pollute(c.pollution * 0.5 / extra); // Adds more AQI
+        }, 250 + i * 240); // Staggered timing
+        setTimeout(() => finish(), 400 + extra * 240 + 900); // Finish after the last burst
         return false; // This flying effect is done
       } // End of explode
       return true; // Still flying
@@ -713,17 +731,17 @@ const PRESETS = { // The collection of behaviours
     effects.push({ update(dt, k) { // Running effect
       wait -= dt; // Count down to next shot
       if (shot < balls && wait <= 0) { // Time to fire a ball
-        const hue = colors[shot % colors.length]; shot++; wait = rand(0.45, 0.7); // Choose its colour and schedule the next
+        const hue = colors[shot % colors.length]; shot++; wait = rand(0.16, 0.3); // Choose its colour and schedule the next (much faster now)
         flying.push({ x: N.x, y: N.y, vx: rand(-1.2, 1.2), vy: -rand(9, 12), hue, top: H * rand(0.15, 0.4) }); // New flying ball
         thump(0.5); crackle(6, 0.2, 0.3); glow(N.x, N.y, 90, hue, 0.9, 4); // Launch sound and light
         for (let i = 0; i < 12; i++) spark(N.x, N.y, rand(-2, 2), -rand(1, 5), { life: rand(0.2, 0.5), h: hue, g: 0.1, s: 1.6 }); // Muzzle sparks
       } // End of firing
       for (let i = flying.length - 1; i >= 0; i--) { // Move every ball
         const b = flying[i]; b.x += b.vx * k; b.y += b.vy * k; b.vy *= Math.pow(0.985, k); // Fly up and slow down
-        spark(b.x, b.y, rand(-0.4, 0.4), rand(0.5, 1.5), { life: rand(0.3, 0.6), h: b.hue, g: 0.03, s: 2.2 }); // Coloured tail
+        spark(b.x, b.y, rand(-0.4, 0.4), rand(0.5, 1.5), { life: rand(0.3, 0.7), h: b.hue, g: 0.03, s: 3 }); // Thicker coloured tail
         glow(b.x, b.y, 50, b.hue, 0.5, 5); // Glow around the ball
         if (b.y <= b.top || b.vy > -2.5) { // Reached its top: pop into a small firework
-          shell(b.x, b.y, pick(['peony', 'ring', 'crossette']), b.hue, 0.45); pollute(c.pollution / balls); flying.splice(i, 1); // Burst, add AQI, remove ball
+          shell(b.x, b.y, pick(['peony', 'ring', 'crossette']), b.hue, 0.8, 1.5); pollute(c.pollution / balls); flying.splice(i, 1); // Burst, add AQI, remove ball
         } // End of pop
       } // End of ball loop
       if (shot >= balls && flying.length === 0) { setTimeout(() => finish(), 900); return false; } // All shot and burst: finish
