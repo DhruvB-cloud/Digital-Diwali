@@ -1,0 +1,1086 @@
+<!doctype html> <!-- Tells the browser this is a modern HTML5 page -->
+<html lang="en"> <!-- Root element; page language is English -->
+<head> <!-- Page settings that are not shown on screen -->
+<meta charset="utf-8"> <!-- Use UTF-8 so emoji and symbols display properly -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> <!-- Makes the page fit phone screens and stops pinch-zoom -->
+<meta name="theme-color" content="#01030c"> <!-- Colours the phone browser bar to match the night sky -->
+<title>Diwali Dhamaka</title> <!-- Text shown in the browser tab -->
+<meta name="description" content="Celebrate Diwali digitally under a starry village sky."> <!-- Short description for search engines -->
+<style> /* ---------- All the visual styling lives below ---------- */
+  :root{ /* Global CSS variables that other rules reuse */
+    --cw: 44px; /* Width of one firecracker icon in the bottom tray (phones) */
+    --gold:#ffc857; /* Diwali gold accent colour */
+    --aqi-color:#5fd068; /* Current AQI colour (JavaScript changes this) */
+  } /* End of variables */
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent} /* Padding counts inside widths; no grey flash on phone taps */
+  html,body{margin:0;height:100%;background:#000;color:#f4ecd8;overflow:hidden; /* Full-height page, no scrollbars, light text on black */
+    font-family:ui-rounded,"Trebuchet MS",system-ui,-apple-system,"Segoe UI",sans-serif; /* Friendly font stack */
+    touch-action:none;user-select:none;-webkit-user-select:none} /* Stop page scrolling/zooming/text-selecting while playing */
+  body.sparkler, body.sparkler *{cursor:none !important} /* Hide the normal mouse arrow while the sparkler is shown */
+
+  #world{position:fixed;inset:0;overflow:hidden} /* Container for everything that can shake */
+  #world.shake{animation:shake .42s cubic-bezier(.36,.07,.19,.97)} /* Big screen shake after a loud bang */
+  #world.tick{animation:tick .12s linear} /* Tiny screen jolt for small bangs */
+  @keyframes shake{ /* Defines the big shake movement */
+    10%,90%{transform:translate(-2px,1px)} 20%,80%{transform:translate(4px,-3px)} /* Small jitters at start and end */
+    30%,50%,70%{transform:translate(-7px,4px)} 40%,60%{transform:translate(7px,-4px)} /* Strong jitters in the middle */
+  } /* End shake keyframes */
+  @keyframes tick{50%{transform:translate(2px,-2px)}} /* Tiny jolt movement */
+
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block} /* Every canvas fills the whole screen */
+  #sky{transform:scale(1.06);transition:filter 1.4s ease;will-change:filter} /* Slightly enlarged so blur edges stay hidden; blur changes smoothly */
+  #fx{pointer-events:none;z-index:20} /* Fireworks layer sits on top and never blocks clicks */
+  #haze{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;pointer-events:none; /* Smog layer, invisible until crackers are burst */
+    background: /* Brownish smog colours */
+      radial-gradient(ellipse 120% 80% at 50% 105%, rgba(176,128,78,.95), rgba(96,74,58,.65) 55%, rgba(40,34,32,0) 100%), /* Thicker smog near the ground */
+      rgba(60,52,48,.55)} /* Light overall grey-brown tint */
+  #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30} /* White flash used when a big bang goes off */
+
+  .brand{position:fixed;top:30px;left:16px;z-index:40;font-weight:700;letter-spacing:.04em; /* Title text in the top-left corner */
+    font-size:clamp(15px,2.4vw,20px);color:var(--gold);text-shadow:0 0 14px rgba(255,200,87,.45);pointer-events:none} /* Responsive size, golden glow */
+  .brand .sub{display:block;font-size:11px;font-weight:500;letter-spacing:.02em;color:#ffe9b8;opacity:.8;text-shadow:none} /* Small tagline under the title */
+  #ctl{position:fixed;top:78px;left:12px;z-index:40;display:flex;flex-direction:column;gap:8px} /* Column of round control buttons (sound, calm mode) */
+  #ctl button{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,200,87,.35);background:rgba(34,20,10,.66);color:#fff;font-size:20px;cursor:pointer;padding:0} /* 44px round buttons: easy to tap, warm dark glass look */
+  #ctl button[aria-pressed="true"]{background:rgba(255,200,87,.28)} /* Highlight when calm mode is on */
+  #aqi{position:fixed;top:30px;right:12px;z-index:40;width:min(215px,52vw);padding:10px 13px 11px; /* AQI card in the top-right corner */
+    border-radius:14px;background:rgba(34,20,10,.66);border:1px solid rgba(255,200,87,.3); /* Rounded warm dark glass card with a gold edge */
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none} /* Blur what is behind the card */
+  #aqi .row{display:flex;justify-content:space-between;gap:8px;font-size:12px;opacity:.8;letter-spacing:.05em;text-transform:uppercase} /* Top row: label + place */
+  #aqi .row span:first-child{white-space:nowrap} /* Keep "AQI · US" on one line */
+  #aqi #loc{text-transform:none;letter-spacing:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} /* Place name: trims with ... if too long */
+  #aqi .big{display:flex;align-items:baseline;gap:10px;margin:2px 0 6px} /* Row holding the big number and its category */
+  #aqiNum{font-size:clamp(32px,6vw,42px);font-weight:800;color:var(--aqi-color);line-height:1;font-variant-numeric:tabular-nums;transition:color .6s} /* Big AQI number */
+  #aqiCat{font-size:12px;font-weight:600;color:var(--aqi-color);transition:color .6s} /* Category text like "Unhealthy" */
+  .db{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;font-size:12px;opacity:.9;letter-spacing:.05em;text-transform:uppercase} /* Noise row: label on the left, dB value on the right */
+  #dbNum{text-transform:none;font-size:15px;font-weight:800;letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--db-color,#5fd068);transition:color .3s} /* The decibel number, coloured by loudness */
+  #dbBar{background:var(--db-color,#5fd068)} /* The noise bar uses the same loudness colour */
+  #dbWarn{margin-top:5px;display:flex;flex-direction:column;gap:3px} /* Holds the warning chips */
+  #dbWarn span{display:block;padding:3px 8px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(255,70,60,.22);border:1px solid rgba(255,90,80,.6);color:#ffb4ad;animation:pulse .6s ease-in-out infinite alternate} /* A red pulsing warning chip */
+  #dbWarn span[hidden]{display:none} /* Hidden chips take no space */
+  @keyframes pulse{to{background:rgba(255,70,60,.45)}} /* Pulse animation for the warning chips */
+  .bar{height:5px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden} /* Track of the AQI progress bar */
+  .bar i{display:block;height:100%;width:0;background:var(--aqi-color);border-radius:5px;transition:background .6s} /* Filled part of the bar */
+  .meta{display:flex;justify-content:space-between;margin-top:7px;font-size:12px;opacity:.85} /* Bottom row: added AQI + crackers count */
+
+  #hint{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:40;max-width:88vw;text-align:center; /* Instruction pill at top centre */
+    padding:8px 16px;border-radius:999px;background:rgba(18,16,22,.55);border:1px solid rgba(255,200,87,.25); /* Pill shape with golden border */
+    font-size:clamp(12px,2.2vw,15px);color:#ffe9b8;pointer-events:none;transition:opacity .4s;white-space:nowrap} /* Responsive text, fades in/out */
+  #hint.off{opacity:0} /* Hidden state of the hint */
+  #clear{pointer-events:auto;margin-top:7px;width:100%;padding:7px 8px;border-radius:10px;border:1px solid rgba(255,200,87,.55);background:rgba(255,200,87,.16);color:#ffe9b8;font:inherit;font-size:13px;font-weight:700;cursor:pointer} /* "Clear the air" button inside the AQI card (it must stay clickable) */
+  #clear[hidden]{display:none} /* Hidden until the air is dirty */
+
+  #tray{position:absolute;left:0;right:0;bottom:0;z-index:15;display:flex;align-items:flex-end; /* Bottom row that holds all firecrackers */
+    gap:clamp(6px,2.2vw,28px);padding:10px 10px calc(10px + env(safe-area-inset-bottom)); /* Spacing; respects phone home-bar area */
+    overflow-x:auto;overflow-y:hidden;touch-action:pan-x;scrollbar-width:none; /* Scrolls sideways on small screens when there are many crackers */
+    background:linear-gradient(to top,rgba(0,0,5,.85),rgba(0,0,5,0))} /* Dark fade so crackers stand out */
+  #tray::-webkit-scrollbar{display:none} /* Hide scrollbar in Chrome/Safari */
+  #tray .cracker:first-child{margin-left:auto} /* Together with the rule below, centres the row when it fits */
+  #tray .cracker:last-child{margin-right:auto} /* ...and still lets it scroll when it does not fit */
+  .cracker{flex:0 0 auto;appearance:none;background:none;border:0;padding:0;color:inherit;font:inherit;display:flex;flex-direction:column; /* One selectable firecracker button */
+    align-items:center;gap:4px;cursor:pointer;transition:transform .2s, filter .2s} /* Icon above its name; smooth hover */
+  .cracker svg{width:var(--cw);height:calc(var(--cw)*2);display:block;filter:drop-shadow(0 0 6px rgba(120,160,255,.25))} /* Icon is twice as tall as wide */
+  .cracker span{font-size:12px;opacity:.9;letter-spacing:.03em;white-space:nowrap} /* Name label under the icon */
+  .cracker:hover{transform:translateY(-8px);filter:brightness(1.2)} /* Lift and brighten on hover */
+  .cracker.picked{opacity:.22;filter:grayscale(1);pointer-events:none} /* Dim (not remove) the icon once picked, so the row keeps its shape */
+  .cracker:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:6px} /* Keyboard focus ring */
+  @media (min-width:700px){ :root{--cw:56px} .cracker span{font-size:13px} } /* Bigger icons and labels on desktops/tablets */
+
+  .staged{position:absolute;z-index:10;transition:left .65s cubic-bezier(.2,.9,.25,1),top .65s cubic-bezier(.2,.9,.25,1), /* The cracker that glides to the centre */
+    width .65s cubic-bezier(.2,.9,.25,1),height .65s cubic-bezier(.2,.9,.25,1),opacity .5s;pointer-events:none} /* Smooth move + resize */
+  .staged svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 14px rgba(255,170,60,.3))} /* Fill the box and glow warmly */
+  .staged.gone{opacity:0} /* Fade-out when the cracker is used up */
+  .staged.lit svg{animation:jit .08s linear infinite} /* Tiny shiver while the fuse is burning */
+  @keyframes jit{50%{transform:translateX(1px)}} /* Shiver movement */
+
+  /* ---------- Festive decorations ---------- */
+  #toran{position:fixed;top:0;left:0;right:0;height:26px;z-index:35;pointer-events:none;opacity:.92; /* Marigold garland hanging across the top of the screen */
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='26'%3E%3Cpath d='M0 2 Q22 24 44 2' fill='none' stroke='%23a8531a' stroke-width='1.5'/%3E%3Ccircle cx='5' cy='6' r='3.6' fill='%23ff9f1c'/%3E%3Ccircle cx='13' cy='12' r='3.6' fill='%23ffbf00'/%3E%3Ccircle cx='22' cy='15' r='4.2' fill='%23ff7b00'/%3E%3Ccircle cx='31' cy='12' r='3.6' fill='%23ffbf00'/%3E%3Ccircle cx='39' cy='6' r='3.6' fill='%23ff9f1c'/%3E%3C/svg%3E") repeat-x} /* One garland tile (orange and yellow flowers on a string), repeated sideways */
+  .diya{position:absolute;bottom:14px;width:54px;z-index:16;display:none;pointer-events:none} /* Decorative lamps, only on wide screens */
+  .diya svg{width:100%;display:block;filter:drop-shadow(0 0 14px rgba(255,170,50,.85))} /* Warm glow around each lamp */
+  @media (min-width:900px){ .diya{display:block} } /* Show the lamps only when there is spare room beside the tray */
+  #diyaL{left:28px} #diyaR{right:28px} /* One lamp on each side */
+  .flame{transform-box:fill-box;transform-origin:50% 95%;animation:flick .18s ease-in-out infinite alternate} /* The flame flickers */
+  @keyframes flick{to{transform:scale(.92,1.14) rotate(3deg)}} /* Flicker movement */
+  #praise{position:fixed;left:50%;top:34%;transform:translateX(-50%);z-index:45;font-size:clamp(26px,7vw,44px);font-weight:800;color:#ffd45a;text-shadow:0 0 18px rgba(255,160,40,.8);pointer-events:none;opacity:0;white-space:nowrap} /* Cheerful word that pops up after each cracker */
+  #praise.go{animation:praise 1.6s ease-out} /* Plays the pop-up animation */
+  @keyframes praise{0%{opacity:0;transform:translate(-50%,20px) scale(.7)}20%{opacity:1;transform:translate(-50%,0) scale(1.1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}} /* Pop in, hold, float away */
+  .arr{position:absolute;bottom:calc(var(--trayh,130px) / 2 - 16px);z-index:16;font-size:38px;line-height:1;color:var(--gold);opacity:0;pointer-events:none;transition:opacity .3s;text-shadow:0 0 10px rgba(255,200,87,.7)} /* Arrows that say "more crackers this way" */
+  #arrL{left:3px} #arrR{right:3px} /* Left and right positions */
+  .arr.on{opacity:.95;animation:nudge .8s ease-in-out infinite alternate} /* Visible and gently nudging */
+  @keyframes nudge{to{transform:translateX(5px)}} /* Nudge movement */
+  #splash{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px; /* Welcome screen covering everything */
+    background:radial-gradient(ellipse at 50% 62%,rgba(130,55,10,.55),rgba(8,4,2,.9) 72%);transition:opacity .6s} /* Warm glow over a dark sky */
+  #splash.hide{opacity:0;pointer-events:none} /* Fades away when started */
+  .sp-card{text-align:center;max-width:460px} /* Centred content box */
+  .sp-diyas{font-size:34px;letter-spacing:10px;animation:flick .4s ease-in-out infinite alternate} /* Row of lamps */
+  .sp-card h1{margin:6px 0 0;font-size:clamp(38px,11vw,72px);line-height:1.15;background:linear-gradient(#fff1b8,#ffb52e 60%,#ff7a18);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,160,40,.5))} /* Big golden greeting */
+  .sp-card h2{margin:4px 0 12px;font-size:clamp(20px,5vw,28px);color:#ffe9b8;font-weight:700} /* English greeting */
+  .sp-card p{margin:0 auto;max-width:360px;font-size:clamp(15px,4vw,18px);line-height:1.5;color:#f4dcc0} /* Short explanation for parents and kids */
+  #start{margin-top:22px;min-height:56px;padding:0 32px;border:0;border-radius:999px;font:inherit;font-size:19px;font-weight:800;color:#3a1600;background:linear-gradient(#ffe08a,#ffa726);box-shadow:0 0 28px rgba(255,170,50,.55);cursor:pointer} /* Big friendly start button */
+  .sp-card small{display:block;margin-top:14px;font-size:13px;color:#d9bfa0} /* Volume reminder */
+
+  /* ---------- Small screens: phones in portrait or landscape ---------- */
+  @media (max-width:560px), (max-height:480px){ /* Compact layout */
+    .brand{font-size:13px;left:10px} .brand .sub{display:none} /* Smaller title, no tagline */
+    #ctl{top:62px;left:8px} #ctl button{width:42px;height:42px;font-size:18px} /* Controls tuck under the title */
+    #aqi{width:min(152px,46vw);padding:6px 8px 7px;right:8px} /* Narrow AQI card that never covers the title */
+    #aqi .bar{display:none} /* Bars are hidden to save space */
+    #praise{top:50%} /* Cheer pops up below the AQI card instead of over it */
+    #aqi .row{font-size:11px} #aqiNum{font-size:28px} #aqiCat{font-size:12px} #aqi .big{margin:0 0 3px;gap:6px} /* Tighter numbers */
+    .meta{margin-top:2px;white-space:nowrap;font-size:11px} .db{margin-top:4px;font-size:11px} #aqiCat{white-space:nowrap} /* One-line rows */
+    #aqi .big{flex-wrap:nowrap} #dbNum{font-size:14px} #dbWarn span{padding:2px 6px} /* Tighter rows */
+    #hint{top:auto;bottom:var(--hintb,calc(var(--trayh,130px) + 8px));width:max-content;max-width:86vw;white-space:normal;font-size:13px;padding:6px 12px} /* Hint sits just above the chosen cracker */
+  } /* End of compact layout */
+  @media (max-height:480px){ :root{--cw:34px} .cracker span{display:none} #tray{padding-top:6px} } /* Short (landscape) screens: smaller icons, no labels, so the tray does not eat the screen */
+  body.lite #aqi,body.lite #ctl button{backdrop-filter:none;-webkit-backdrop-filter:none} /* "Lite" mode for slower phones: skip costly blur effects */
+  body.lite #sky{transition:none} /* ...and skip the sky blur animation */
+</style> <!-- End of styles -->
+</head> <!-- End of head -->
+<body> <!-- Everything visible starts here -->
+<div id="world"> <!-- Shakeable container -->
+  <canvas id="sky"></canvas> <!-- Layer 1: night sky with Milky Way and stars -->
+  <div id="haze"></div> <!-- Layer 2: smog that grows with pollution -->
+  <div id="tray"></div> <!-- Layer 3: bottom row of firecrackers (filled by JavaScript) -->
+  <canvas id="fx"></canvas> <!-- Layer 4: sparks, fireworks and the sparkler -->
+  <div id="arrL" class="arr">‹</div><div id="arrR" class="arr">›</div> <!-- "More crackers" arrows for small screens -->
+  <div id="diyaL" class="diya"><svg viewBox="0 0 60 56" aria-hidden="true"><g class="flame"><path d="M30 2 C40 14 38 24 30 27 C22 24 20 14 30 2Z" fill="#ffd45a"/><path d="M30 12 C35 18 34 24 30 26 C26 24 25 18 30 12Z" fill="#ff8c1a"/></g><path d="M4 30 Q30 58 56 30 Z" fill="#c2672b"/><ellipse cx="30" cy="30" rx="26" ry="5" fill="#8a3f14"/><ellipse cx="30" cy="30" rx="18" ry="3" fill="#ffcf6b" opacity=".8"/></svg></div> <!-- Left decorative diya (clay lamp) -->
+  <div id="diyaR" class="diya"><svg viewBox="0 0 60 56" aria-hidden="true"><g class="flame"><path d="M30 2 C40 14 38 24 30 27 C22 24 20 14 30 2Z" fill="#ffd45a"/><path d="M30 12 C35 18 34 24 30 26 C26 24 25 18 30 12Z" fill="#ff8c1a"/></g><path d="M4 30 Q30 58 56 30 Z" fill="#c2672b"/><ellipse cx="30" cy="30" rx="26" ry="5" fill="#8a3f14"/><ellipse cx="30" cy="30" rx="18" ry="3" fill="#ffcf6b" opacity=".8"/></svg></div> <!-- Right decorative diya -->
+</div> <!-- End of world -->
+<div id="toran" aria-hidden="true"></div> <!-- Marigold garland across the top -->
+<div id="flash"></div> <!-- Full-screen white flash overlay -->
+
+<div class="brand">🪔 Diwali Dhamaka<span class="sub">A pollution-free Diwali 🌿</span></div> <!-- Site title and tagline -->
+<div id="ctl"> <!-- Control buttons -->
+  <button id="snd" aria-label="Toggle sound" title="Sound on/off">🔊</button> <!-- Mute / unmute button -->
+  <button id="calm" aria-label="Calm mode: less flashing and shaking" aria-pressed="false" title="Calm mode: less flashing and shaking">✨</button> <!-- Reduces flashes and shaking -->
+</div> <!-- End of controls -->
+
+<div id="aqi" aria-live="polite"> <!-- AQI card; screen readers announce changes -->
+  <div class="row"><span title="Air Quality Index (US scale)">🌫️ AQI</span><span id="loc">—</span></div> <!-- Label and detected place name -->
+  <div class="big"><span id="aqiNum">--</span><span id="aqiCat">&nbsp;</span></div> <!-- Big number and category -->
+  <div class="bar"><i id="aqiBar"></i></div> <!-- Coloured progress bar -->
+  <div class="meta"><span id="delta">+0 from crackers</span></div> <!-- Extra AQI caused by you and burst count -->
+  <div class="db"><span>🔊 Noise</span><b id="dbNum">38 dB</b></div> <!-- Current loudness in decibels -->
+  <div class="bar"><i id="dbBar"></i></div> <!-- Loudness bar -->
+  <div id="dbWarn"><span id="wDog" hidden>🐶 Painful for dogs!</span><span id="wHuman" hidden>👂 Painful for humans!</span></div> <!-- Warnings that appear when it gets too loud -->
+  <button id="clear" hidden>🌬️ Clear the air</button> <!-- Appears when the air is dirty; clears the smoke quickly -->
+</div> <!-- End of AQI card -->
+
+<div id="hint">Pick a firecracker from below ✨</div> <!-- Instruction text shown to the player -->
+<div id="praise" aria-hidden="true"></div> <!-- Cheerful word shown after each cracker -->
+<div id="splash" role="dialog" aria-label="Welcome"> <!-- Welcome screen -->
+  <div class="sp-card"> <!-- Centred content -->
+    <div class="sp-diyas" aria-hidden="true">🪔 🪔 🪔</div> <!-- Row of lamps -->
+    <h1>शुभ दीपावली</h1> <!-- "Shubh Deepavali" in Hindi -->
+    <h2>Happy Diwali!</h2> <!-- English greeting -->
+    <p>Light crackers with a sparkler — no smoke, no burns, no scared pets. 🌿</p> <!-- Short pitch -->
+    <button id="start">🪔 Let's celebrate</button> <!-- Starts the experience (also unlocks sound) -->
+    <small>🔊 Sound on — set the volume to a comfortable level</small> <!-- Gentle volume reminder -->
+  </div> <!-- End of content -->
+</div> <!-- End of welcome screen -->
+
+<script> /* ---------- All the behaviour lives below ---------- */
+(() => { // Wrap everything in a function so nothing leaks into the global scope
+'use strict'; // Turn on strict mode to catch coding mistakes early
+
+/* =====================================================================
+   SECTION 1 — YOUR FIRECRACKER LIST  (EDIT HERE TO ADD CUSTOM CRACKERS)
+   ---------------------------------------------------------------------
+   Each cracker is an object with these fields:
+     id        : unique short name, e.g. 'mycracker'
+     name      : label shown under the icon
+     type      : behaviour preset ->
+                 'fountain' (sparks shoot up), 'rocket' (flies up & explodes),
+                 'bomb' (loud bang), 'spinner' (spinning wheel of sparks),
+                 'string' (chain of bangs), 'candle' (shoots coloured balls),
+                 or 'custom' (you write your own run(api) function)
+     pollution : how many AQI points it adds
+     opts      : settings for the preset (see the examples below)
+     scale     : (optional) draw the cracker bigger/smaller in the middle, e.g. 1.5
+     art       : array of SVG lines, drawn inside a 60 x 120 box.
+                 Include ONE shape with class="fuse-tip" where the fuse ends.
+   Copy any entry, change the values, and your cracker appears in the tray!
+   ===================================================================== */
+const CRACKERS = [ // The master list of all firecrackers
+  { id: 'anar', name: 'Anar', type: 'fountain', pollution: 14, // Flowerpot: a gold fountain
+    opts: { dur: 5.5, colors: [40, 0, 120, 200, 300, 50], nozzle: [30, 52], power: 1.5, spread: 4.2, rate: 16, glitter: 0.12 }, // 5.5 s, many colours, taller (power) and wider (spread) spray, spark rate, mid-air glitter bursts
+    art: [ // SVG drawing lines
+      '<g transform="translate(30 0) scale(1.4 1) translate(-30 0)">', // Start of a group that makes the cracker 40% wider
+      '<polygon points="14,118 46,118 42,52 18,52" fill="#d6402b"/>', // Red conical body
+      '<polygon points="17.3,64 42.7,64 43.2,72 16.8,72" fill="#f4c542"/>', // Upper gold band
+      '<polygon points="15.3,96 44.7,96 45.2,104 14.8,104" fill="#f4c542"/>', // Lower gold band
+      '<circle cx="30" cy="85" r="8" fill="#f4c542"/><circle cx="30" cy="85" r="4.5" fill="#d6402b"/>', // Gold badge
+      '<ellipse cx="30" cy="52" rx="12" ry="4" fill="#2b1a12"/>', // Dark nozzle opening
+      '<path d="M30 52 q4 -14 -2 -24" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="28" cy="28" r="3" fill="none"/>', // Marks where the sparkler must touch
+      '</g>' // End of the widening group
+    ] }, // End of Anar
+  { id: 'rainbow', name: 'Rainbow', type: 'fountain', pollution: 15, // Colourful fountain
+    opts: { dur: 6, colors: [0, 30, 60, 120, 180, 220, 280, 320], nozzle: [30, 50], power: 1.6, spread: 5, rate: 18, glitter: 0.15 }, // 6 s, whole rainbow of colours, big wide spray, lots of glitter
+    art: [ // SVG drawing lines
+      '<g transform="translate(30 0) scale(1.4 1) translate(-30 0)">', // Start of a group that makes the cracker 40% wider
+      '<polygon points="12,118 48,118 43,50 17,50" fill="#3b2a6e"/>', // Purple body
+      '<polygon points="16.4,62 43.6,62 44.4,70 15.6,70" fill="#ff4d4d"/>', // Red stripe
+      '<polygon points="15.2,74 44.8,74 45.6,82 14.4,82" fill="#ffd23f"/>', // Yellow stripe
+      '<polygon points="14,86 46,86 46.8,94 13.2,94" fill="#3ddc84"/>', // Green stripe
+      '<polygon points="12.8,98 47.2,98 48,106 12,106" fill="#4da3ff"/>', // Blue stripe
+      '<ellipse cx="30" cy="50" rx="13" ry="4" fill="#150f2b"/>', // Nozzle
+      '<path d="M30 50 q-5 -12 3 -22" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="33" cy="28" r="3" fill="none"/>', // Fuse tip
+      '</g>' // End of the widening group
+    ] }, // End of Rainbow
+  { id: 'rocket', name: 'Rocket', type: 'rocket', pollution: 18, // Flies up and explodes
+    opts: { launch: [30, 50], shells: ['peony', 'ring', 'willow', 'crossette'], extra: 5 }, // Shell styles and number of follow-up bursts (each a different colour)
+    art: [ // SVG drawing lines
+      '<rect x="28.5" y="74" width="3" height="44" fill="#c8a86a"/>', // Wooden stick
+      '<polygon points="20,30 40,30 30,6" fill="#d6402b"/>', // Red nose cone
+      '<rect x="20" y="30" width="20" height="46" rx="2" fill="#e9b424"/>', // Yellow body
+      '<rect x="20" y="44" width="20" height="7" fill="#d6402b"/><rect x="20" y="60" width="20" height="4" fill="#d6402b"/>', // Red bands
+      '<polygon points="20,66 12,80 20,76" fill="#d6402b"/><polygon points="40,66 48,80 40,76" fill="#d6402b"/>', // Two fins
+      '<path d="M34 76 q10 2 12 12" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="46" cy="88" r="3" fill="none"/>' // Fuse tip
+    ] }, // End of Rocket
+  { id: 'candle', name: 'Roman Candle', type: 'candle', pollution: 17, // Shoots coloured fireballs one by one
+    opts: { balls: 14, colors: [0, 50, 120, 200, 290, 330], nozzle: [30, 24] }, // 14 balls, their colours, where they leave the tube
+    art: [ // SVG drawing lines
+      '<rect x="20" y="24" width="20" height="94" rx="3" fill="#1f6f5c"/>', // Green tube
+      '<rect x="20" y="40" width="20" height="6" fill="#f4c542"/>', // Gold band 1
+      '<rect x="20" y="70" width="20" height="6" fill="#f4c542"/>', // Gold band 2
+      '<rect x="20" y="100" width="20" height="6" fill="#f4c542"/>', // Gold band 3
+      '<ellipse cx="30" cy="24" rx="10" ry="3" fill="#0b2a22"/>', // Tube opening
+      '<path d="M40 112 q10 2 10 -10" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse at the bottom side
+      '<circle class="fuse-tip" cx="50" cy="102" r="3" fill="none"/>' // Fuse tip
+    ] }, // End of Roman Candle
+  { id: 'bomb', name: 'Atom Bomb', type: 'bomb', pollution: 26, // Very loud bang
+    scale: 1.5, opts: { power: 1.3 }, // Drawn 1.5x bigger on screen, with a bigger blast
+    art: [ // SVG drawing lines
+      '<rect x="13" y="44" width="34" height="62" rx="6" fill="#c0392b"/>', // Red body
+      '<rect x="13" y="44" width="34" height="8" rx="3" fill="#f1c40f"/><rect x="13" y="98" width="34" height="8" rx="3" fill="#f1c40f"/>', // Gold caps
+      '<rect x="18" y="58" width="24" height="30" rx="2" fill="#fff1c9"/>', // Cream label
+      '<text x="30" y="70" font-size="7.5" font-weight="800" text-anchor="middle" fill="#8e1b10" font-family="Arial,sans-serif">ATOM</text>', // Label text line 1
+      '<text x="30" y="80" font-size="7.5" font-weight="800" text-anchor="middle" fill="#8e1b10" font-family="Arial,sans-serif">BOMB</text>', // Label text line 2
+      '<path d="M30 44 q-6 -10 2 -18" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="32" cy="26" r="3" fill="none"/>' // Fuse tip
+    ] }, // End of Atom Bomb
+  { id: 'sutli', name: 'Sutli Bomb', type: 'bomb', pollution: 8, // Small, sharp bang
+    opts: { power: 0.5 }, // Half power
+    art: [ // SVG drawing lines
+      '<ellipse cx="30" cy="96" rx="18" ry="20" fill="#c9a66b"/>', // Paper-wrapped ball
+      '<path d="M14 90 q16 8 32 0 M13 99 q17 8 34 0 M16 108 q14 7 28 0" stroke="#7a5a2c" stroke-width="2" fill="none"/>', // Thread wrapped around it
+      '<path d="M30 76 q-6 -8 2 -14" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="32" cy="62" r="3" fill="none"/>' // Fuse tip
+    ] }, // End of Sutli Bomb
+  { id: 'chakri', name: 'Chakri', type: 'spinner', pollution: 12, scale: 1.6, // Spinning wheel that darts around the screen (drawn 1.6x bigger)
+    opts: { dur: 6.5, colors: [35, 48, 120, 18, 190, 320], center: [30, 92], radius: 26 }, // Burn time, spark colours, wheel centre and radius inside the art
+    art: [ // SVG drawing lines (a wheel seen from above, so it can rotate flat)
+      '<circle cx="30" cy="92" r="26" fill="#3a2a1a"/>', // Dark disc
+      '<circle cx="30" cy="92" r="21" fill="none" stroke="#d6402b" stroke-width="3.5"/>', // Outer red ring
+      '<circle cx="30" cy="92" r="14.5" fill="none" stroke="#f4c542" stroke-width="3.5"/>', // Middle gold ring
+      '<circle cx="30" cy="92" r="8" fill="none" stroke="#d6402b" stroke-width="3.5"/>', // Inner red ring
+      '<circle cx="30" cy="92" r="2.5" fill="#f4c542"/>', // Centre dot
+      '<path d="M30 70 q9 -10 -1 -18 q-5 -4 1 -10" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Curly fuse
+      '<circle class="fuse-tip" cx="30" cy="42" r="3" fill="none"/>' // Fuse tip
+    ] }, // End of Chakri
+  { id: 'ladi', name: 'Ladi', type: 'string', pollution: 20, scale: 1.4, // Chain of small bangs that throws the crackers around like a ragdoll
+    opts: { count: 16, top: 34, bottom: 118 }, // Number of bangs and the vertical range they travel
+    art: [0, 1, 2, 3, 4, 5].map(i => // Draw six small crackers in a column
+      `<rect x="22" y="${34 + i * 14}" width="16" height="12" rx="2.5" fill="#cf3a2b"/><rect x="22" y="${38 + i * 14}" width="16" height="3" fill="#f4c542"/>` // One red cracker with a gold stripe
+    ).concat([ // Then add the thread and fuse
+      '<line x1="30" y1="34" x2="30" y2="118" stroke="#f0e6cc" stroke-width="1" opacity=".7"/>', // Thread joining them
+      '<path d="M30 34 q-5 -8 1 -14" stroke="#d9c48a" stroke-width="2" fill="none" stroke-linecap="round"/>', // Fuse wire
+      '<circle class="fuse-tip" cx="31" cy="20" r="3" fill="none"/>' // Fuse tip
+    ]) } // End of Ladi
+
+  /* ---------- ADD YOUR OWN CRACKER BELOW (copy one block above, add a comma before it) ----------
+  ,{ id: 'mine', name: 'My Cracker', type: 'fountain', pollution: 12,
+     opts: { dur: 4, colors: [330, 190], nozzle: [30, 50] },
+     art: ['<rect x="18" y="50" width="24" height="68" fill="hotpink"/>',
+           '<circle class="fuse-tip" cx="30" cy="40" r="3" fill="none"/>'] }
+  ---------- FULLY CUSTOM EFFECT: use type:'custom' and write run(api) ----------
+  ,{ id: 'wow', name: 'Wow', type: 'custom', pollution: 10, art: [ ...svg lines... ],
+     run(api) {                                   // api gives you helper functions:
+       const p = api.pt(30, 50);                  // convert art coordinates -> screen position
+       api.shell(p.x, p.y - 200, 'ring', 200);    // big firework: 'peony'|'ring'|'willow'|'crossette'
+       api.bang(1);                               // sound of a bang (volume 1)
+       api.pollute(10);                           // add to AQI
+       setTimeout(api.finish, 1200);              // ALWAYS call finish() when done
+     } }
+  ------------------------------------------------------------------------------------------------ */
+]; // End of the firecracker list
+
+/* =====================================================================
+   SECTION 2 — SMALL HELPERS
+   ===================================================================== */
+const $ = s => document.querySelector(s); // Shortcut: find one element by CSS selector
+const rand = (a, b) => a + Math.random() * (b - a); // Random decimal number between a and b
+const pick = a => a[(Math.random() * a.length) | 0]; // Pick a random item from an array
+const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5; // Random number clustered around 0 (range about -1..1)
+const world = $('#world'), skyC = $('#sky'), fxC = $('#fx'), haze = $('#haze'); // Grab the main page elements
+const sky = skyC.getContext('2d'), fx = fxC.getContext('2d'); // Drawing tools for the sky and fireworks canvases
+const bgC = document.createElement('canvas'), bg = bgC.getContext('2d'); // Hidden canvas that stores the pre-drawn Milky Way
+let W = 0, H = 0, DPR = 1; // Screen width, height and pixel density (filled in by resize())
+
+/* =====================================================================
+   SECTION 3 — SOUND (all sounds are generated in code, no files needed)
+   ===================================================================== */
+let ac = null, master = null, noiseBuf = null, muted = false, sparkNode = null; // Audio engine, volume knob, noise sample, mute flag, sparkler sound
+let calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); // Calm mode starts ON if the device asks for reduced motion
+const VOL = 0.5; // Master volume (0 to 1): kept moderate because crackers are loud
+const DB_BASE = 38, DB_DOG = 80, DB_HUMAN = 120; // Quiet village night level, and the dB limits where it becomes painful for dogs / humans (edit freely)
+let dbLevel = DB_BASE, dogUntil = 0, humanUntil = 0, dbPeak = DB_BASE, peakUntil = 0; // Current loudness, when each warning ends, and the held peak reading shown for 3 seconds
+function addDb(db) { // Registers a loud sound of `db` decibels (works even if the sound is muted)
+  const now = performance.now() / 1000; // Current time in seconds
+  dbLevel = Math.max(dbLevel, Math.min(150, db)); // The meter jumps up to the loudest sound (max 150)
+  if (now > peakUntil || db >= dbPeak) { dbPeak = Math.min(150, db); peakUntil = now + 3; } // Remember the loudest recent sound so the number matches the warnings
+  if (db >= DB_DOG) dogUntil = now + 3; // Too loud for dogs: keep that warning for 3 seconds
+  if (db >= DB_HUMAN) humanUntil = now + 3; // Too loud for humans: keep that warning for 3 seconds
+} // End of addDb
+function ensureAudio() { // Creates/unlocks audio (browsers only allow it after a tap or click)
+  if (!ac) { // If we have not created the audio engine yet
+    const AC = window.AudioContext || window.webkitAudioContext; // Standard name, or the older Safari name
+    if (!AC) return false; // Very old browser: no sound possible
+    ac = new AC(); // Create the audio engine
+    master = ac.createGain(); master.gain.value = muted ? 0 : VOL; // Master volume knob
+    const comp = ac.createDynamicsCompressor(); // Compressor stops loud bangs from distorting
+    master.connect(comp); comp.connect(ac.destination); // Route: master -> compressor -> speakers
+    noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate); // Two seconds of empty audio
+    const d = noiseBuf.getChannelData(0); // Access its raw numbers
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; // Fill with random noise (the raw material for bangs and hisses)
+  } // End of first-time setup
+  if (ac.state === 'suspended') ac.resume(); // Wake the engine if the browser paused it
+  return true; // Audio is ready
+} // End of ensureAudio
+function noiseSrc() { const s = ac.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s; } // Makes a looping noise player
+function bang(vol = 1, len = 1) { // A firecracker bang: noise burst + deep thump
+  addDb(62 + 30 * vol); // Louder bang = more decibels (vol 1.5 is about 107 dB, the Atom Bomb about 126 dB)
+  if (!ac) return; const t = ac.currentTime; // Skip if no audio; remember "now"
+  const n = noiseSrc(), f = ac.createBiquadFilter(), g = ac.createGain(); // Noise player, filter, volume
+  f.type = 'lowpass'; // Let only low frequencies through
+  f.frequency.setValueAtTime(7000, t); f.frequency.exponentialRampToValueAtTime(180, t + 0.55 * len); // Sound gets duller as it fades, like a real boom
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.7 * len); // Start loud, die away
+  n.connect(f).connect(g).connect(master); n.start(t, Math.random()); n.stop(t + 0.8 * len + 0.1); // Wire up, play from a random spot, stop soon after
+  const o = ac.createOscillator(), og = ac.createGain(); // Low sine wave for the chest-thumping thump
+  o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(34, t + 0.45 * len); // Pitch drops quickly
+  og.gain.setValueAtTime(vol * 0.95, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.55 * len); // Thump volume fades
+  o.connect(og).connect(master); o.start(t); o.stop(t + 0.6 * len); // Wire up and play
+} // End of bang
+function tickSound(t, v) { // One tiny "pop" used to build crackling
+  const n = noiseSrc(), f = ac.createBiquadFilter(), g = ac.createGain(); // Noise, filter, volume
+  f.type = 'highpass'; f.frequency.value = 1500 + Math.random() * 3500; // Keep only sharp high sounds
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.045); // Very short blip
+  n.connect(f).connect(g).connect(master); n.start(t, Math.random()); n.stop(t + 0.07); // Wire up and play
+} // End of tickSound
+function crackle(count, dur, vol = 0.5) { // Many tiny pops spread over time (sparkly crackle)
+  addDb(55 + 30 * vol); // Crackling is fairly quiet
+  if (!ac) return; // No audio, nothing to do
+  for (let i = 0; i < count; i++) tickSound(ac.currentTime + Math.random() * dur, vol * (0.25 + Math.random() * 0.75)); // Schedule each pop at a random moment
+} // End of crackle
+function hiss(dur, vol, f0, f1, type = 'bandpass') { // A swooshing/hissing sound that sweeps in pitch
+  addDb(50 + 35 * vol); // Hisses are about 60-75 dB
+  if (!ac) return; const t = ac.currentTime; // Skip if no audio; note the time
+  const n = noiseSrc(), f = ac.createBiquadFilter(), g = ac.createGain(); // Noise, filter, volume
+  f.type = type; f.Q.value = 0.8; // Filter style and sharpness
+  f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur); // Sweep from f0 to f1 Hz
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + Math.min(0.15, dur / 3)); // Fade in
+  g.gain.setValueAtTime(vol, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); // Hold, then fade out
+  n.connect(f).connect(g).connect(master); n.start(t, Math.random()); n.stop(t + dur + 0.1); // Wire up and play
+} // End of hiss
+function whirr(dur) { // Buzzing sound of a spinning chakri
+  addDb(68); // A whirring chakri is about 68 dB
+  if (!ac) return; const t = ac.currentTime; // Skip if no audio; note the time
+  const o = ac.createOscillator(), lp = ac.createBiquadFilter(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain(); // Buzz wave, filter, volume, wobble wave, wobble depth
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(300, t + dur); // Pitch rises as it spins faster
+  lp.type = 'lowpass'; lp.frequency.value = 1100; // Soften the buzz
+  lfo.frequency.value = 16; lg.gain.value = 0.03; lfo.connect(lg).connect(g.gain); // 16 Hz wobble makes it sound like it is rotating
+  g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0.0001, t + dur); // Fade out over time
+  o.connect(lp).connect(g).connect(master); o.start(t); lfo.start(t); o.stop(t + dur); lfo.stop(t + dur); // Wire up, play and stop
+} // End of whirr
+function thump(vol = 0.5) { // Short "pom" sound of a ball leaving a Roman candle
+  addDb(60 + 20 * vol); // A pom is about 70 dB
+  if (!ac) return; const t = ac.currentTime; // Skip if no audio; note the time
+  const o = ac.createOscillator(), g = ac.createGain(); // Sine wave and volume
+  o.type = 'sine'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(70, t + 0.15); // Quick pitch drop
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2); // Quick fade
+  o.connect(g).connect(master); o.start(t); o.stop(t + 0.25); // Wire up and play
+} // End of thump
+function startSparklerSound() { // Soft continuous fizz while the sparkler is lit
+  if (!ac || sparkNode) return; // Need audio and must not start twice
+  const n = noiseSrc(), f = ac.createBiquadFilter(), g = ac.createGain(); // Noise, filter, volume
+  f.type = 'highpass'; f.frequency.value = 3500; g.gain.value = 0.05; // Thin hiss, quiet
+  n.connect(f).connect(g).connect(master); n.start(); sparkNode = { n, g }; // Start and remember so we can stop it
+} // End of startSparklerSound
+function stopSparklerSound() { // Stops the sparkler fizz
+  if (!sparkNode) return; // Nothing to stop
+  try { sparkNode.n.stop(); } catch (e) {} // Stop the noise, ignoring errors
+  sparkNode = null; // Forget it
+} // End of stopSparklerSound
+$('#calm').addEventListener('click', e => { // When the calm-mode button is pressed
+  e.stopPropagation(); calm = !calm; // Flip calm mode
+  $('#calm').textContent = calm ? '🌙' : '✨'; $('#calm').setAttribute('aria-pressed', calm); // Update the icon and accessibility state
+  setHint(calm ? 'Calm mode on: gentler flashes and no shaking 🌙' : 'Calm mode off ✨'); // Tell the player
+}); // End of click handler
+$('#calm').textContent = calm ? '🌙' : '✨'; $('#calm').setAttribute('aria-pressed', calm); // Show the right state at start
+$('#snd').addEventListener('click', e => { // When the sound button is pressed
+  e.stopPropagation(); ensureAudio(); muted = !muted; // Unlock audio and flip the mute flag
+  if (master) master.gain.value = muted ? 0 : VOL; // Apply the new volume
+  $('#snd').textContent = muted ? '🔇' : '🔊'; // Show the matching icon
+}); // End of click handler
+['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, ensureAudio, { passive: true })); // Unlock audio on the very first tap/click/key (needed on phones)
+
+/* =====================================================================
+   SECTION 4 — NIGHT SKY (deep blue, Milky Way, lots of stars)
+   ===================================================================== */
+let stars = [], shooting = null; // Twinkling stars and the current shooting star
+function buildBackdrop() { // Paints the still part of the sky once (gradient + Milky Way + nebula)
+  bgC.width = W * DPR; bgC.height = H * DPR; bg.setTransform(DPR, 0, 0, DPR, 0, 0); // Match hidden canvas to the screen size
+  const grad = bg.createLinearGradient(0, 0, 0, H); // Vertical colour gradient
+  grad.addColorStop(0, '#010208'); grad.addColorStop(0.5, '#040d2a'); grad.addColorStop(1, '#0a2050'); // Near-black at top, deep blue near the horizon
+  bg.fillStyle = grad; bg.fillRect(0, 0, W, H); // Fill the whole sky with it
+  bg.save(); bg.translate(W * 0.5, H * 0.42); bg.rotate(-0.55); // Move to the middle and tilt, so the Milky Way runs diagonally
+  const L = Math.hypot(W, H), S = Math.min(W, H); // Length of the band and the smaller screen side
+  bg.globalCompositeOperation = 'lighter'; // Overlapping lights add up, like real glow
+  for (let i = 0; i < 16; i++) { // Soft glowing clouds along the band
+    const x = rand(-L / 2, L / 2), y = gauss() * S * 0.05, r = rand(0.14, 0.34) * S + 70; // Position and size of one cloud
+    const rg = bg.createRadialGradient(x, y, 0, x, y, r); // Round gradient for the cloud
+    rg.addColorStop(0, 'rgba(130,160,255,.11)'); rg.addColorStop(0.5, 'rgba(70,100,210,.05)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); // Bright blue centre fading out
+    bg.fillStyle = rg; bg.fillRect(x - r, y - r, r * 2, r * 2); // Paint the cloud
+  } // End of clouds loop
+  for (let i = 0; i < 5; i++) { // A few coloured nebula patches
+    const x = rand(-L / 2, L / 2), y = gauss() * S * 0.12, r = rand(0.08, 0.2) * S + 40; // Position and size
+    const rg = bg.createRadialGradient(x, y, 0, x, y, r); // Round gradient
+    rg.addColorStop(0, pick(['rgba(150,90,255,.07)', 'rgba(60,200,220,.06)', 'rgba(255,120,170,.04)'])); rg.addColorStop(1, 'rgba(0,0,0,0)'); // Purple, teal or pink tint
+    bg.fillStyle = rg; bg.fillRect(x - r, y - r, r * 2, r * 2); // Paint the patch
+  } // End of nebula loop
+  const dust = Math.min(7000, Math.floor(W * H / 260)); // How many tiny stars make up the band
+  for (let i = 0; i < dust; i++) { // Draw each tiny star
+    const x = rand(-L / 2, L / 2), y = gauss() * S * 0.11; // Gaussian spread: dense in the middle of the band
+    bg.fillStyle = `rgba(${200 + rand(0, 55) | 0},${215 + rand(0, 40) | 0},255,${rand(0.12, 0.55)})`; // Faint bluish-white colour
+    const s = rand(0.3, 0.95); bg.fillRect(x, y, s, s); // Tiny dot
+  } // End of dust loop
+  bg.globalCompositeOperation = 'source-over'; // Back to normal drawing
+  for (let i = 0; i < 6; i++) { // Dark dust lanes that make the band look real
+    bg.fillStyle = `rgba(1,3,14,${rand(0.05, 0.11)})`; // Nearly-black, see-through
+    bg.beginPath(); bg.ellipse(rand(-L / 3, L / 3), gauss() * S * 0.03, rand(60, 220), rand(6, 22), rand(-0.15, 0.15), 0, 6.283); bg.fill(); // Stretched dark blob
+  } // End of dust lanes loop
+  bg.restore(); // Undo the tilt/translate
+  drawSkyline(); // Finally, add the black city silhouette along the bottom
+} // End of buildBackdrop
+function drawSkyline() { // Draws black building silhouettes (blocks, domes, towers) along the bottom of the sky
+  const th = $('#tray').offsetHeight || 130; // Height of the cracker tray, so buildings rise above it
+  bg.fillStyle = '#000'; // Pure black silhouettes
+  let x = -10; // Start just off the left edge
+  while (x < W) { // Place buildings until the screen is full
+    const w = rand(34, 92), h = th * 0.6 + rand(15, 115), type = pick(['block', 'block', 'dome', 'tower', 'stepped']); // Width, height and kind of building
+    bg.fillRect(x, H - h, w, h + 2); // The main body of the building
+    if (type === 'dome') { bg.beginPath(); bg.arc(x + w / 2, H - h, w * 0.38, Math.PI, 0); bg.fill(); bg.fillRect(x + w / 2 - 1.5, H - h - w * 0.38 - 14, 3, 14); } // A temple-style dome with a small spire
+    else if (type === 'tower') { bg.fillRect(x + w * 0.4, H - h - 38, w * 0.2, 38); bg.fillRect(x + w / 2 - 0.8, H - h - 62, 1.6, 24); } // A narrow tower with an antenna
+    else if (type === 'stepped') { bg.fillRect(x + w * 0.15, H - h - 16, w * 0.7, 16); bg.fillRect(x + w * 0.3, H - h - 28, w * 0.4, 12); } // A building with smaller levels on top
+    const winH = H - h; // Top of the building (for placing lit windows)
+    for (let wy = winH + 12; wy < H - 6; wy += 16) for (let wx = x + 7; wx < x + w - 8; wx += 12) { // A grid of possible windows
+      if (Math.random() < 0.09) { bg.fillStyle = `rgba(255,${190 + rand(0, 40) | 0},100,${rand(0.55, 0.9)})`; bg.fillRect(wx, wy, 3, 4.5); bg.fillStyle = '#000'; } // A few tiny warm lit windows (diya-like)
+    } // End of window grid
+    x += w + rand(-6, 8); // Move on to the next building (small gaps or overlaps)
+  } // End of building loop
+} // End of drawSkyline
+function drawSky(t, dt) { // Draws the sky every frame
+  sky.clearRect(0, 0, W, H); // Wipe the previous frame
+  sky.drawImage(bgC, 0, 0, W, H); // Paste the pre-drawn Milky Way
+  for (const s of stars) { // Draw every twinkling star
+    const tw = 0.55 + 0.45 * Math.sin(t * s.sp + s.ph); // Brightness wobbles smoothly over time
+    sky.fillStyle = `hsla(${s.h},${s.sat}%,${s.l}%,${(s.b * tw).toFixed(2)})`; // Star colour with its current brightness
+    if (s.r < 0.9) sky.fillRect(s.x, s.y, s.r * 1.6, s.r * 1.6); // Tiny stars are fast little squares
+    else { sky.beginPath(); sky.arc(s.x, s.y, s.r, 0, 6.283); sky.fill(); } // Bigger stars are round
+  } // End of star loop
+  if (!shooting && Math.random() < dt * 0.12) { // Sometimes (about once per 8 seconds) launch a shooting star
+    shooting = { x: rand(W * 0.1, W * 0.9), y: rand(0, H * 0.35), vx: rand(380, 560) * pick([-1, 1]), vy: rand(130, 240), life: 0.9 }; // Random start and speed
+  } // End of shooting-star creation
+  if (shooting) { // If a shooting star is flying
+    const s = shooting; s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt; // Move it and age it
+    const g = sky.createLinearGradient(s.x, s.y, s.x - s.vx * 0.18, s.y - s.vy * 0.18); // Gradient along its tail
+    g.addColorStop(0, `rgba(230,240,255,${Math.max(0, s.life)})`); g.addColorStop(1, 'rgba(230,240,255,0)'); // Bright head, fading tail
+    sky.strokeStyle = g; sky.lineWidth = 1.6; // Line style
+    sky.beginPath(); sky.moveTo(s.x, s.y); sky.lineTo(s.x - s.vx * 0.18, s.y - s.vy * 0.18); sky.stroke(); // Draw the streak
+    if (s.life <= 0) shooting = null; // Remove it when it has faded
+  } // End of shooting-star drawing
+} // End of drawSky
+function resize() { // Runs at start and whenever the window size changes
+  DPR = Math.min(window.devicePixelRatio || 1, 2); // Sharpness: use device pixel ratio but cap at 2 for speed
+  W = window.innerWidth; H = window.innerHeight; // Current screen size
+  for (const c of [skyC, fxC]) { c.width = W * DPR; c.height = H * DPR; } // Resize both visible canvases
+  sky.setTransform(DPR, 0, 0, DPR, 0, 0); fx.setTransform(DPR, 0, 0, DPR, 0, 0); // Let us draw in CSS pixels
+  buildBackdrop(); // Repaint the still sky for the new size
+  const count = Math.min(1500, Math.floor(W * H / 1000)); // Number of bright twinkling stars (many!)
+  stars = Array.from({ length: count }, () => { // Create each star
+    const warm = Math.random() < 0.12; // A few warm yellow/orange stars
+    return { x: Math.random() * W, y: Math.random() * H, // Random position
+      r: Math.random() < 0.05 ? rand(1.3, 2) : rand(0.35, 1.1), // Mostly tiny, a few big
+      ph: Math.random() * 6.28, sp: rand(0.6, 2.6), b: rand(0.4, 1), // Twinkle phase, speed, base brightness
+      h: warm ? rand(25, 50) : rand(200, 230), sat: warm ? 70 : rand(30, 80), l: warm ? 85 : rand(82, 96) }; // Colour: blue-white or warm
+  }); // End of star creation
+  document.documentElement.style.setProperty('--trayh', ($('#tray').offsetHeight || 130) + 'px'); // Tell CSS how tall the tray is
+  updateArrows(); // Refresh the tray arrows
+  if (staged && staged.ready) placeStaged(false); // Re-centre the chosen cracker after a resize
+} // End of resize
+
+/* =====================================================================
+   SECTION 5 — BUILD THE TRAY FROM THE CRACKER LIST
+   ===================================================================== */
+const svgFor = c => `<svg viewBox="0 0 60 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${c.art.join('')}</svg>`; // Wraps a cracker's art lines into a full SVG picture
+const tray = $('#tray'); // The bottom row element
+for (const c of CRACKERS) { // Make one button for every cracker in the list
+  const b = document.createElement('button'); // New button
+  b.className = 'cracker'; b.dataset.id = c.id; b.setAttribute('aria-label', 'Select ' + c.name); // Style class, id, accessibility label
+  b.innerHTML = svgFor(c) + `<span>${c.name}</span>`; // Picture plus name
+  b.addEventListener('click', () => selectCracker(b, c)); // Clicking/tapping picks this cracker
+  tray.appendChild(b); // Add to the tray
+} // End of tray loop
+
+/* =====================================================================
+   SECTION 6 — GAME STATE, POINTER (MOUSE + TOUCH) AND STAGING
+   ===================================================================== */
+let staged = null; // The cracker currently in the middle: { def, el, btn, ready, lit }
+let sparklerOn = false; // True while the sparkler replaces the cursor
+const ptr = { x: -999, y: -999, seen: false, touch: false }; // Latest pointer position and whether it is a finger
+let bursts = 0, added = 0, baseAQI = null, shown = 0; // Crackers burst, AQI added by you, real AQI, AQI currently displayed
+function trackPointer(e) { ptr.x = e.clientX; ptr.y = e.clientY; ptr.seen = true; ptr.touch = e.pointerType === 'touch'; } // Remember where the mouse/finger is
+window.addEventListener('pointermove', trackPointer); // Update when moving
+window.addEventListener('pointerdown', trackPointer); // Update when pressing
+function tip() { return { x: ptr.x, y: ptr.touch ? ptr.y - 70 : ptr.y }; } // Sparkler tip: on touch screens it floats above the finger so you can see it
+function setHint(msg) { // Shows or hides the instruction text
+  const h = $('#hint'); // Find the hint pill
+  if (!msg) { h.classList.add('off'); return; } // No message: hide it
+  h.textContent = msg; h.classList.remove('off'); // Otherwise set text and show it
+} // End of setHint
+function stagedTarget() { // Works out where the chosen cracker should sit (bottom centre)
+  const trayH = $('#tray').offsetHeight; // Height of the tray
+  let w = Math.min(96, W * 0.26) * (staged?.def.scale ?? 1); // Cracker width: up to 96px, or 26% of screen (times the cracker's own 'scale' if it has one)
+  const maxH = H * 0.44; if (w * 2 > maxH) w = maxH / 2; // Never taller than 44% of the screen
+  const h = w * 2; // Height is double the width
+  return { w, h, left: W / 2 - w / 2, top: H - trayH - 6 - h }; // Centred horizontally, just above the tray
+} // End of stagedTarget
+function placeStaged(animate) { // Moves the chosen cracker to its target place
+  const t = stagedTarget(), s = staged.el.style; // Target and the element's style
+  if (!animate) s.transition = 'none'; // Jump instantly when not animating
+  s.left = t.left + 'px'; s.top = t.top + 'px'; s.width = t.w + 'px'; s.height = t.h + 'px'; // Apply position and size
+  document.documentElement.style.setProperty('--hintb', (H - t.top + 10) + 'px'); // On phones, keep the hint just above the cracker (never on top of it)
+  if (!animate) { void staged.el.offsetWidth; s.transition = ''; } // Force layout, then re-enable animation
+} // End of placeStaged
+function selectCracker(btn, def) { // Called when a cracker in the tray is tapped
+  if (staged && staged.lit) return; // Ignore taps while one is burning
+  ensureAudio(); // Make sure sound is unlocked
+  if (staged) dropStaged(); // If another cracker was waiting, put it back
+  const r = btn.querySelector('svg').getBoundingClientRect(); // Where the icon is now
+  const el = document.createElement('div'); // New floating cracker element
+  el.className = 'staged'; el.innerHTML = svgFor(def); // Give it the same art
+  Object.assign(el.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); // Start exactly on top of the tray icon
+  world.appendChild(el); // Put it on screen
+  btn.classList.add('picked'); // Hide the original icon in the tray
+  staged = { def, el, btn, ready: false, lit: false }; // Remember the new state
+  const me = staged; // Keep a reference for the timer below
+  requestAnimationFrame(() => requestAnimationFrame(() => placeStaged(true))); // Next frame: glide to the centre
+  setTimeout(() => { me.ready = true; }, 700); // After the glide, allow lighting it
+  sparklerOn = true; document.body.classList.add('sparkler'); startSparklerSound(); // Switch the cursor to a sparkler and start its fizz
+  if (!ptr.seen) { ptr.x = W * 0.62; ptr.y = H * 0.5; } // If no pointer seen yet, place the sparkler somewhere sensible
+  setHint(ptr.touch ? 'Drag the sparkler tip onto the fuse 🔥' : 'Touch the sparkler tip to the fuse to light it 🔥'); // Tell the player what to do
+} // End of selectCracker
+function dropStaged() { staged.el.remove(); staged.btn.classList.remove('picked'); staged = null; document.documentElement.style.removeProperty('--hintb'); } // Puts an unlit cracker back in the tray
+const PRAISE = ['Wow! ⭐', 'Dhamaka! 💥', 'Shabash! 🌟', 'Awesome! 🎇', 'Bahut khoob! ✨', 'Shubh Deepavali! 🪔']; // Cheerful words
+function praise() { const el = $('#praise'); el.textContent = pick(PRAISE); el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); } // Shows a random cheer that pops up and floats away
+let clearing = false; // True while the 'Clear the air' button is working
+function updateArrows() { // Shows arrows when the tray has more crackers off-screen
+  const t = $('#tray'); // The tray
+  $('#arrL').classList.toggle('on', t.scrollLeft > 8); // Arrow on the left if scrolled right
+  $('#arrR').classList.toggle('on', t.scrollLeft + t.clientWidth < t.scrollWidth - 8); // Arrow on the right if more to the right
+} // End of updateArrows
+$('#tray').addEventListener('scroll', updateArrows, { passive: true }); // Update arrows while scrolling
+function finish(msg = 'Boom! Pick another one 🎆') { // Called when a cracker has finished burning
+  const s = staged; if (!s) return; // Nothing to finish
+  s.el.classList.add('gone'); setTimeout(() => s.el.remove(), 600); // Fade the cracker away then delete it
+  s.btn.classList.remove('picked'); // Show its icon in the tray again (unlimited supply)
+  staged = null; sparklerOn = false; document.body.classList.remove('sparkler'); stopSparklerSound(); // Back to normal cursor, stop fizz
+  bursts++; setHint(msg); praise(); document.documentElement.style.removeProperty('--hintb'); // Count it, show a message, pop up a cheer
+  if (clearing) clearing = false; // A new cracker ends any 'clear the air' action
+} // End of finish
+const fuseScreen = () => { // Screen position of the fuse tip of the staged cracker
+  const r = staged.el.querySelector('.fuse-tip').getBoundingClientRect(); // Bounding box of the marker circle
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; // Its centre
+}; // End of fuseScreen
+const svgPt = (R, x, y) => ({ x: R.left + x / 60 * R.width, y: R.top + y / 120 * R.height }); // Converts art coordinates (0-60, 0-120) to screen pixels
+
+/* =====================================================================
+   SECTION 7 — PARTICLES (sparks, smoke) AND LIGHT EFFECTS
+   ===================================================================== */
+const parts = [], lights = [], effects = []; // All sparks/smoke, glows/rings, and running cracker behaviours
+let maxParts = 3200, lite = /[?&]lite/.test(location.search); // Safety limit on sparks; 'lite' mode (automatic on slow devices, or add ?lite to the address) uses fewer
+if (lite) { maxParts = 1500; document.body.classList.add('lite'); } // Apply lite mode right away if requested
+function spark(x, y, vx, vy, o = {}) { // Creates one spark (or smoke puff)
+  if (parts.length > maxParts) return; // Too many already: skip
+  if (lite && (o.kind ?? 'spark') !== 'smoke' && Math.random() < 0.45) return; // In lite mode, drop about half of the sparks
+  const life = o.life ?? 1; // How many seconds it lives
+  parts.push({ x, y, px: x, py: y, vx, vy, life, max: life, h: o.h ?? 40, l: o.l ?? 60, s: o.s ?? 1.6, // Position, previous position, speed, life, colour, size
+    g: o.g ?? 0.06, d: o.d ?? 0.985, tw: o.tw ?? false, split: o.split ?? 0, kind: o.kind ?? 'spark' }); // Gravity, air drag, flicker, splits in two, type
+} // End of spark
+function smoke(x, y, n = 1, big = 1) { // Creates grey smoke puffs
+  for (let i = 0; i < n; i++) spark(x + rand(-8, 8), y + rand(-8, 8), rand(-0.6, 0.6), rand(-1.1, -0.2), // Slightly random start, drifts upward
+    { kind: 'smoke', life: rand(2.5, 4.5), s: rand(14, 26) * big, g: -0.004, d: 0.99 }); // Long-lived and big
+} // End of smoke
+let lastFlash = 0, lastShake = 0; // When the last flash / shake happened (to limit how often they repeat)
+function glow(x, y, r, h, a = 1, decay = 2.4) { lights.push({ x, y, r, h, a: calm ? a * 0.45 : a, decay }); } // Adds a soft glowing light that fades (dimmer in calm mode)
+function ring(x, y, v = 900) { lights.push({ x, y, r: 8, vr: v, a: 1, decay: 2.2, ring: true }); } // Adds an expanding shockwave ring
+function flashScreen(a) { // Briefly flashes the whole screen white (gently, and never more than ~2 times a second)
+  const now = performance.now(); // Current time in milliseconds
+  if (calm || now - lastFlash < 450) return; // Calm mode: no flashes. Otherwise skip if the last one was too recent (photosensitivity safety)
+  lastFlash = now; a = Math.min(a, 0.28); // Remember this flash and cap its brightness
+  const f = $('#flash'); f.style.transition = 'none'; f.style.opacity = a; void f.offsetWidth; // Instantly set brightness
+  f.style.transition = 'opacity .55s ease-out'; f.style.opacity = 0; // Then fade out
+} // End of flashScreen
+function shake(big = true) { // Shakes the screen (big or small), but not in calm mode and not too often
+  const now = performance.now(); // Current time in milliseconds
+  if (calm || now - lastShake < 500) return; // Skip in calm mode or if the last shake was very recent
+  lastShake = now; // Remember this shake
+  const cls = big ? 'shake' : 'tick'; // Pick the animation
+  world.classList.remove('shake', 'tick'); void world.offsetWidth; world.classList.add(cls); // Restart the animation
+  if (navigator.vibrate) navigator.vibrate(big ? 60 : 15); // Phones also vibrate a little
+} // End of shake
+function pollute(n) { added = Math.min(400, added + n); } // Adds AQI points (limit 400)
+function updateParts(dt) { // Moves all sparks and lights forward in time
+  const k = dt * 60; // Time scale: 1 at 60 frames per second
+  for (let i = parts.length - 1; i >= 0; i--) { // Loop backwards so removing is safe
+    const p = parts[i]; // Current spark
+    p.life -= dt; // It gets older
+    if (p.life <= 0) { parts[i] = parts[parts.length - 1]; parts.pop(); continue; } // Dead: remove it
+    if (p.split && p.life < p.max * 0.55) { // Crossette sparks split in two halfway through their life
+      for (let j = 0; j < 9; j++) { const a = Math.random() * 6.283, v = rand(1, 3.2); // New random direction and speed
+        spark(p.x, p.y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.6, 1), h: p.h, g: 0.05, d: 0.97, tw: true }); } // Spawn the smaller sparks
+      p.life = 0; continue; // Remove the parent spark
+    } // End of split
+    const dk = Math.pow(p.d, k); // Air drag for this frame
+    p.px = p.x; p.py = p.y; // Remember old position (used to draw a trail)
+    p.vx *= dk; p.vy = p.vy * dk + p.g * k; // Slow down and fall with gravity
+    p.x += p.vx * k; p.y += p.vy * k; // Move
+  } // End of particle loop
+  for (let i = lights.length - 1; i >= 0; i--) { // Loop through glows and rings
+    const l = lights[i]; l.a -= l.decay * dt; // Fade out
+    if (l.ring) { l.r += l.vr * dt; l.vr *= Math.pow(0.93, k); } // Rings expand and slow down
+    if (l.a <= 0) lights.splice(i, 1); // Remove when invisible
+  } // End of lights loop
+} // End of updateParts
+const smokeSprite = (() => { // Pre-draws one soft, feathered smoke puff to reuse (much nicer than flat discs)
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); // Small hidden canvas
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); // Round gradient from the centre outward
+  gr.addColorStop(0, 'rgba(165,155,145,.9)'); gr.addColorStop(0.5, 'rgba(150,140,130,.4)'); gr.addColorStop(1, 'rgba(150,140,130,0)'); // Dense centre, transparent edge
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; // Paint it and hand back the canvas
+})(); // End of smoke sprite
+function drawParts() { // Paints all sparks, smoke and lights
+  fx.globalCompositeOperation = 'source-over'; // Normal drawing for smoke
+  for (const p of parts) { // Smoke first (it sits behind the sparks)
+    if (p.kind !== 'smoke') continue; // Skip non-smoke
+    const r = p.life / p.max; // How much life remains (1 to 0)
+    const rr = p.s * (1 + (1 - r) * 2.2) * 1.7; // Puff radius: grows as it ages
+    fx.globalAlpha = r * 0.3; fx.drawImage(smokeSprite, p.x - rr, p.y - rr, rr * 2, rr * 2); // A soft, feathered grey puff that fades out
+  } fx.globalAlpha = 1; // End of smoke loop; restore full opacity
+  fx.globalCompositeOperation = 'lighter'; // Additive mixing makes sparks glow
+  fx.lineCap = 'round'; // Rounded line ends
+  for (const l of lights) { // Draw glows and rings
+    if (l.ring) { // Shockwave ring
+      fx.strokeStyle = `rgba(255,225,170,${Math.max(0, l.a * 0.8)})`; fx.lineWidth = 5 * l.a + 1; // Fading, thinning line
+      fx.beginPath(); fx.arc(l.x, l.y, l.r, 0, 6.283); fx.stroke(); // Draw the circle outline
+    } else { // Soft glow
+      const g = fx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r); // Round gradient
+      g.addColorStop(0, `hsla(${l.h},100%,70%,${Math.min(1, l.a) * 0.55})`); // Bright centre
+      g.addColorStop(1, `hsla(${l.h},100%,50%,0)`); // Transparent edge
+      fx.fillStyle = g; fx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2); // Paint the glow
+    } // End of glow/ring choice
+  } // End of lights loop
+  for (const p of parts) { // Now the sparks themselves
+    if (p.kind === 'smoke') continue; // Smoke was already drawn
+    const r = p.life / p.max; // Remaining life
+    let a = Math.min(1, r * 1.6); // Brightness fades near the end
+    if (p.tw && Math.random() < 0.3) a *= 0.25; // Twinkling sparks randomly dim
+    fx.strokeStyle = `hsla(${p.h},100%,${p.l + r * 25}%,${a.toFixed(3)})`; // Colour: whiter when fresh
+    fx.lineWidth = p.s * (0.5 + r * 0.7); // Thinner as it dies
+    fx.beginPath(); fx.moveTo(p.px, p.py); fx.lineTo(p.x + 0.01, p.y); fx.stroke(); // Draw a short streak from old to new position
+  } // End of spark loop
+  fx.globalCompositeOperation = 'source-over'; // Reset drawing mode
+} // End of drawParts
+
+/* =====================================================================
+   SECTION 8 — FIREWORK SHELLS (the big colourful bursts)
+   ===================================================================== */
+function shell(x, y, style, hue, loud = 1, size = 1) { // Explodes a firework at (x,y). style = peony | ring | willow | crossette; size scales how far sparks fly
+  const first = parts.length; // Remember where this shell's sparks start in the list
+  const n = style === 'ring' ? 80 : 130; // Number of sparks
+  const hue2 = (hue + 150 + rand(0, 60)) % 360; // A second contrasting colour
+  if (style === 'peony') { // Classic round burst
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = 1 + Math.sqrt(Math.random()) * 5.2; // Random direction and speed
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(1.1, 1.9), h: v < 2.6 ? hue2 : hue, g: 0.05, d: 0.972, tw: Math.random() < 0.3 }); } // Slow sparks use colour 2
+  } else if (style === 'ring') { // Circular ring burst
+    const tilt = rand(0.35, 1); // How flat the ring looks
+    for (let i = 0; i < n; i++) { const a = i / n * 6.283; // Evenly spaced angles
+      spark(x, y, Math.cos(a) * 4.6, Math.sin(a) * 4.6 * tilt, { life: rand(1.3, 1.7), h: hue, g: 0.04, d: 0.975 }); } // Same speed all round
+    for (let i = 0; i < 40; i++) { const a = Math.random() * 6.283, v = rand(0.5, 2); // Small inner sparkle
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.8, 1.2), h: hue2, g: 0.05, d: 0.97 }); } // Uses colour 2
+  } else if (style === 'willow') { // Long golden drooping trails
+    for (let i = 0; i < n; i++) { const a = Math.random() * 6.283, v = 1 + Math.sqrt(Math.random()) * 4; // Random direction and speed
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(2.4, 3.4), h: 42, l: 62, g: 0.035, d: 0.982, s: 1.3, tw: true }); } // Long life, gentle gravity
+  } else { // Crossette: sparks that split into more sparks
+    for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283 + rand(-0.1, 0.1), v = rand(3, 4.2); // 12 spokes
+      spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(1.2, 1.5), h: hue, g: 0.05, d: 0.97, s: 2.2, split: 1 }); } // Flagged to split later
+  } // End of style choice
+  if (size !== 1) for (let i = first; i < parts.length; i++) { parts[i].vx *= size; parts[i].vy *= size; } // Bigger shells: sparks fly faster, so the burst spreads wider
+  glow(x, y, 240 * size, hue, 1); flashScreen(0.1 * loud); // Coloured light and a faint screen flash
+  bang(0.7 * loud, 1.1); crackle(26, 1.1, 0.35 * loud); // Boom plus crackling
+  smoke(x, y, 5, 1.2); // Leave some smoke
+} // End of shell
+const SHELLS = ['peony', 'ring', 'willow', 'crossette', 'peony']; // Default list of shell styles to choose from
+
+/* =====================================================================
+   SECTION 9 — BEHAVIOUR PRESETS (what each 'type' actually does)
+   Each preset receives the cracker definition `c` (with c.opts, c.pollution)
+   ===================================================================== */
+function igniteAnimation(onDone) { // Fuse-burning sequence before the main effect
+  const s = staged; s.lit = true; s.el.classList.add('lit'); // Mark as lit and make it shiver
+  setHint(null); // Hide the hint text
+  hiss(0.7, 0.35, 3500, 7000, 'highpass'); // Fuse sizzle sound
+  effects.push({ t: 0, update(dt) { // Add a small timed effect
+    this.t += dt; const f = fuseScreen(); // Count time; find the fuse tip
+    for (let i = 0; i < 4; i++) spark(f.x, f.y, rand(-2.5, 2.5), rand(-3.5, 0.5), { life: rand(0.2, 0.5), h: rand(30, 55), l: 70, g: 0.12, s: 1.4 }); // Little sparks from the fuse
+    glow(f.x, f.y, 50, 40, 0.8, 4); // Tiny glow at the fuse tip
+    if (this.t > 0.7) { s.el.classList.remove('lit'); onDone(); return false; } // After 0.7 s stop shivering and start the real effect
+    return true; // Otherwise keep running
+  } }); // End of fuse effect
+} // End of igniteAnimation
+
+const PRESETS = { // The collection of behaviours
+  fountain(c) { // Sparks shoot upward like a flowerpot
+    const o = c.opts, R = staged.el.getBoundingClientRect(), N = svgPt(R, o.nozzle[0], o.nozzle[1]); // Settings, cracker box, nozzle screen position
+    const dur = o.dur ?? 4.5, colors = o.colors ?? [40], power = o.power ?? 1, spread = o.spread ?? 1.6, rate = o.rate ?? 7, glit = o.glitter ?? 0; // Duration, colours, height multiplier, sideways spread, sparks per frame, glitter chance
+    hiss(dur, 0.55, 1800, 700); crackle(30, dur - 0.4, 0.12); // Whoosh and crackle sounds
+    effects.push({ t: 0, update(dt, k) { // Add the running effect
+      this.t += dt; // Advance time
+      const ramp = Math.min(1, this.t / 0.4) * Math.min(1, (dur - this.t) / 0.8); // Fade in at start, fade out at end
+      const n = Math.floor(rate * ramp + Math.random()); // Sparks to create this frame
+      for (let i = 0; i < n; i++) { // Create each spark
+        const h = pick(colors); // Choose one of the colours
+        spark(N.x + rand(-6, 6), N.y, rand(-spread, spread), -rand(6, 12) * power * (0.6 + 0.4 * ramp), // Shoot up (taller with power) with wide sideways drift
+          { life: rand(1.1, 2.1), h, l: colors.length > 1 ? 58 : 62, g: 0.13, d: 0.988, s: rand(1.4, 2.6), tw: true }); // Gravity pulls them back down; thicker twinkling sparks
+      } // End of spark loop
+      glow(N.x, N.y - 60, 170 + 90 * power, pick(colors), 0.6 * ramp, 6); // Bigger coloured light around the fountain
+      if (glit && Math.random() < glit * k * ramp) { // Now and then, a glittering mini-burst pops in mid-air
+        const gx = N.x + rand(-1, 1) * 45 * spread, gy = N.y - rand(100, 160) * power, gh = pick(colors); // Where it pops and its colour
+        for (let j = 0; j < 22; j++) { const a = Math.random() * 6.283, v = rand(0.8, 3.4); // Random direction and speed
+          spark(gx, gy, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.5, 1), h: gh, l: 75, g: 0.05, d: 0.96, s: 1.6, tw: true }); } // Twinkling glitter
+        glow(gx, gy, 80, gh, 0.7, 5); crackle(5, 0.2, 0.25); // Little light and crackle sound
+      } // End of glitter
+      if (Math.random() < 0.3 * k) smoke(N.x, N.y - 30, 1); // Occasional smoke
+      pollute(c.pollution / dur * dt); // Slowly add AQI while it burns
+      if (this.t >= dur) { finish(); return false; } // Done: finish
+      return true; // Keep going
+    } }); // End of effect
+  }, // End of fountain
+
+  rocket(c) { // Flies up then explodes
+    const o = c.opts, R = staged.el.getBoundingClientRect(), S = svgPt(R, o.launch[0], o.launch[1]); // Settings, box, launch point
+    const shells = o.shells ?? SHELLS; // Shell styles allowed
+    staged.el.style.opacity = 0; // Hide the cracker picture (the rocket "leaves")
+    const ty = H * rand(0.14, 0.32); // Height where it will explode
+    hiss(1.5, 0.5, 500, 2600); // Whoosh sound
+    bang(0.9, 0.8); flashScreen(0.35); shake(true); glow(S.x, S.y, 320, 40, 1.2, 2); ring(S.x, S.y, 700); // BIG launch sparkle: bang, flash, shake, light and ring
+    for (let i = 0; i < 160; i++) { const a = Math.random() * 6.283, v = rand(1.5, 9); // Burst of sparks in every direction
+      spark(S.x, S.y, Math.cos(a) * v, Math.sin(a) * v - 2, { life: rand(0.5, 1.3), h: pick([40, 50, 20, 190, 320]), l: 68, g: 0.1, d: 0.96, s: rand(1.4, 2.6), tw: true }); } // Multi-coloured launch sparkles
+    crackle(30, 0.8, 0.4); smoke(S.x, S.y, 8, 1.4); // Crackle sound and smoke at the launch pad
+    effects.push({ x: S.x, y: S.y, vy: -9.5, sw: Math.random() * 6, update(dt, k) { // Flying rocket
+      this.sw += dt * 14; this.x += Math.sin(this.sw) * 0.4 * k; this.y += this.vy * k; this.vy *= Math.pow(0.992, k); // Wobble sideways, move up, slow slightly
+      for (let i = 0; i < 3; i++) spark(this.x + rand(-1.5, 1.5), this.y + 8, rand(-0.5, 0.5), rand(1, 2.5), { life: rand(0.35, 0.7), h: rand(25, 50), l: 65, g: 0.03, s: 1.7 }); // Fiery tail
+      if (Math.random() < 0.5) smoke(this.x, this.y + 10, 1, 0.5); // Smoke trail
+      glow(this.x, this.y, 60, 35, 0.5, 5); // Light around the rocket
+      if (this.y <= ty || this.vy > -3) { // Reached its height: explode!
+        const hue = Math.floor(rand(0, 360)), x = this.x, y = this.y; // Random colour and position
+        shell(x, y, pick(shells), hue, 1); shake(false); pollute(c.pollution * 0.5); // Main burst
+        const extra = o.extra ?? 5; // How many follow-up bursts
+        for (let i = 0; i < extra; i++) setTimeout(() => { // Follow-up bursts around the first one
+          shell(x + rand(-190, 190), y + rand(-60, 110), pick(shells), (hue + (i + 1) * 360 / (extra + 1)) % 360, 0.8, 1.1); // Each burst gets a different colour around the colour wheel
+          pollute(c.pollution * 0.5 / extra); // Adds more AQI
+        }, 250 + i * 240); // Staggered timing
+        setTimeout(() => finish(), 400 + extra * 240 + 900); // Finish after the last burst
+        return false; // This flying effect is done
+      } // End of explode
+      return true; // Still flying
+    } }); // End of effect
+  }, // End of rocket
+
+  bomb(c) { // One huge bang
+    const p = c.opts.power ?? 1, R = staged.el.getBoundingClientRect(), C = svgPt(R, 30, 75); // Power scale, box, centre
+    staged.el.style.opacity = 0; // The cracker is destroyed
+    bang(1.5 * p + 0.2, 1.4 * p + 0.2); flashScreen(0.9 * p); shake(p > 0.7); // Sound, flash and shake (small bombs only jolt)
+    glow(C.x, C.y, 380 * p, 35, 1.2, 1.6); ring(C.x, C.y, 1100 * p); // Light and shockwave
+    for (let i = 0; i < 170 * p; i++) { const a = Math.random() * 6.283, v = rand(1.5, 14) * p; // Fast sparks in all directions
+      spark(C.x, C.y, Math.cos(a) * v, Math.sin(a) * v - 2, { life: rand(0.35, 1.2), h: rand(8, 50), g: 0.15, d: 0.95, s: rand(1.4, 3) }); } // Orange-yellow debris
+    for (let i = 0; i < 24 * p; i++) { const a = Math.random() * 6.283, v = rand(2, 8) * p; // Paper bits
+      spark(C.x, C.y, Math.cos(a) * v, Math.sin(a) * v - 3, { life: rand(1, 1.8), h: 5, l: 45, s: 3.4, g: 0.2, d: 0.96, tw: true }); } // Red flying scraps
+    smoke(C.x, C.y, 16 * p, 1.8 * p + 0.3); crackle(18, 0.8, 0.4 * p); // Smoke and crackle
+    pollute(c.pollution); // Add AQI
+    setTimeout(() => finish(), 900); // Finish after a moment
+  }, // End of bomb
+
+  spinner(c) { // A wheel that spins flat and darts all over the screen until it burns out
+    const o = c.opts, R = staged.el.getBoundingClientRect(), C0 = svgPt(R, o.center[0], o.center[1]); // Settings, box, starting centre of the wheel
+    const dur = o.dur ?? 6, colors = o.colors ?? [35, 48], rad = (o.radius ?? 26) / 60 * R.width; // Burn time, spark colours, wheel radius in pixels
+    const el = staged.el, bw = R.width, bh = R.height; // The cracker element and its size
+    el.style.transition = 'none'; el.style.transformOrigin = `${o.center[0] / 60 * 100}% ${o.center[1] / 120 * 100}%`; // Move instantly, and rotate around the wheel's centre
+    whirr(dur); hiss(dur, 0.25, 2200, 4500); crackle(60, dur, 0.15); // Buzz, hiss and crackle sounds
+    effects.push({ t: 0, rot: 0, x: C0.x, y: C0.y, dir: -Math.PI / 2, turn: 0, boost: 1, update(dt, k) { // Running effect: x,y is the wheel's centre, dir its heading
+      this.t += dt; const life = Math.max(0, Math.min(1, (dur - this.t) / (dur * 0.3))); // 1 while burning strongly, fades to 0 in the last 30%
+      this.turn -= dt; if (this.turn <= 0) { this.dir += rand(-2, 2); this.turn = rand(0.1, 0.3); this.boost = Math.random() < 0.25 ? 1.8 : 1; } // Every fraction of a second: swerve randomly, sometimes dash
+      const v = 660 * this.boost * (0.25 + 0.75 * life), vx = Math.cos(this.dir) * v, vy = Math.sin(this.dir) * v; // Speed in pixels per second (slows as it dies)
+      this.x += vx * dt; this.y += vy * dt; // Move
+      const m = rad + 12; // Keep the whole wheel on screen
+      if (this.x < m) { this.x = m; this.dir = Math.PI - this.dir; } else if (this.x > W - m) { this.x = W - m; this.dir = Math.PI - this.dir; } // Bounce off the left/right edges
+      if (this.y < m + 80) { this.y = m + 80; this.dir = -this.dir; } else if (this.y > H - m) { this.y = H - m; this.dir = -this.dir; } // Bounce off the top/bottom edges
+      this.rot += (6 + 28 * life) * dt; // Spins twice as fast now, fastest while strong
+      el.style.left = (this.x - o.center[0] / 60 * bw) + 'px'; el.style.top = (this.y - o.center[1] / 120 * bh) + 'px'; // Move the picture so its centre follows the wheel
+      el.style.transform = `rotate(${this.rot}rad)`; // Rotate the picture (flat spin, no flipping)
+      for (let j = 0; j < 6; j++) { // Six spark jets around the rim
+        const a = this.rot + j * 1.047, n = Math.ceil(3 * life + Math.random()); // Angle of this jet; more sparks per frame for extra intensity
+        for (let q = 0; q < n; q++) spark(this.x + Math.cos(a) * rad * 0.9, this.y + Math.sin(a) * rad * 0.9, // Start on the rim
+          -Math.sin(a) * (5 + 4 * life) + Math.cos(a) * 1.5 + vx / 60 * 0.5 + rand(-1, 1), Math.cos(a) * (5 + 4 * life) + Math.sin(a) * 1.5 + vy / 60 * 0.5 + rand(-1, 1), // Fly off sideways (tangent), a bit outward, plus the wheel's own motion
+          { life: rand(0.5, 1.1), h: pick(colors), l: 62, g: 0.1, d: 0.965, s: rand(1.8, 3), tw: true }); // Bigger, longer-lived coloured sparks
+      } // End of jets
+      glow(this.x, this.y, 230, pick(colors), 0.7 * life, 6); // Big coloured light around the wheel
+      if (Math.random() < 0.2 * k) smoke(this.x, this.y, 1, 0.8); // Smoke trail
+      pollute(c.pollution / dur * dt); // Slowly add AQI
+      if (this.t >= dur) { // Burnt out
+        bang(0.8, 0.8); shell(this.x, this.y, 'peony', Math.floor(rand(0, 360)), 0.7, 1.3); finish(); return false; // Final pop with a small firework, then finish
+      } // End of ending
+      return true; // Keep going
+    } }); // End of effect
+  }, // End of spinner
+
+  string(c) { // Chain of bangs; after each bang the crackers are thrown around like a ragdoll
+    const o = c.opts, R = staged.el.getBoundingClientRect(), total = o.count ?? 16, top = o.top ?? 34, bottom = o.bottom ?? 118; // Settings, box, number of bangs, vertical range
+    const N = 6, sz = R.width / 60, gap = (bottom - top) / N * sz, cw = 16 * sz, ch = 12 * sz; // 6 small crackers; pixels per art unit; spacing; cracker width and height
+    const pts = Array.from({ length: N }, (_, i) => { const p = svgPt(R, 30, top + 6 + i * (bottom - top) / N); return { x: p.x, y: p.y, px: p.x, py: p.y, hits: 0 }; }); // One physics point per cracker (x,y now; px,py before)
+    const floor = R.bottom - ch / 2; // The ground level the chain lands on
+    staged.el.style.opacity = 0; // Hide the still picture; we draw the moving chain ourselves
+    const POW = 2.24; // Blast strength: speed x2.24 means about 5x the energy of before
+    let n = 0, wait = 0.1, endT = -1, fade = 1; // Bangs so far, delay to next bang, time left after last bang, drawing opacity
+    effects.push({ update(dt) { // Running effect
+      for (let s = 0, steps = Math.max(1, Math.round(dt * 60)); s < steps; s++) { // Run the physics in 1/60-second steps
+        for (const p of pts) { const vx = (p.x - p.px) * 0.992, vy = (p.y - p.py) * 0.992; p.px = p.x; p.py = p.y; p.x += vx; p.y += vy + 0.6; } // Verlet motion: keep velocity, add gravity
+        for (let it = 0; it < 5; it++) for (let i = 0; i < N - 1; i++) { // Keep neighbouring crackers a fixed distance apart (the thread)
+          const a = pts[i], b = pts[i + 1], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.001, f = (d - gap) / d * 0.5; // How far the thread is stretched
+          a.x += dx * f; a.y += dy * f; b.x -= dx * f; b.y -= dy * f; // Pull both ends together
+        } // End of thread constraint
+        for (const p of pts) { // Collide with the ground and the walls
+          if (p.y > floor) { const vy = p.y - p.py, vx = p.x - p.px; p.y = floor; p.py = p.y + vy * 0.35; p.px = p.x - vx * 0.8; } // Ground: bounce a little and rub (friction)
+          if (p.y < ch / 2) { const vy = p.y - p.py; p.y = ch / 2; p.py = p.y + vy * 0.35; } // Ceiling bounce so strong blasts keep the chain on screen
+          if (p.x < cw / 2) { const vx = p.x - p.px; p.x = cw / 2; p.px = p.x + vx * 0.5; } // Left wall bounce
+          if (p.x > W - cw / 2) { const vx = p.x - p.px; p.x = W - cw / 2; p.px = p.x + vx * 0.5; } // Right wall bounce
+        } // End of collisions
+      } // End of physics steps
+      wait -= dt; // Count down to the next bang
+      if (n < total && wait <= 0) { // Time for the next explosion
+        n++; const last = n === total, idx = Math.min(N - 1, Math.floor((n - 1) / total * N)), p = pts[idx], big = last ? 1 : 0.35; // Which bang, is it the last, which cracker explodes
+        p.hits++; // This cracker gets more burnt
+        p.px = p.x - rand(-10, 10) * POW * (last ? 1.6 : 1); p.py = p.y + rand(10, 18) * POW * (last ? 1.5 : 1); // Blast kicks it up and sideways
+        for (const q of [pts[idx - 1], pts[idx + 1]]) if (q) { q.px = q.x - rand(-4, 4) * POW; q.py = q.y + rand(3, 7) * POW; } // Neighbours get a smaller kick
+        if (last) for (const q of pts) { q.px = q.x - rand(-12, 12) * POW; q.py = q.y + rand(8, 20) * POW; } // The final bang throws every cracker
+        bang(1.1 + big * 1.2, 0.6 + big * 0.8); // Much louder, longer bang
+        flashScreen(last ? 0.8 : 0.35); shake(true); ring(p.x, p.y, last ? 1000 : 600); // Every bang now flashes, shakes the screen and sends a shockwave
+        glow(p.x, p.y, 300 + big * 300, 28, 1.2, 3); // Big flash of light
+        for (let j = 0; j < (last ? 300 : 90); j++) { const a = Math.random() * 6.283, v = rand(2, last ? 20 : 11); // Many more, much faster sparks
+          spark(p.x, p.y, Math.cos(a) * v, Math.sin(a) * v - 1, { life: rand(0.4, last ? 1.2 : 0.9), h: rand(5, 48), g: 0.14, d: 0.95, s: 2.2 }); } // Orange sparks
+        smoke(p.x, p.y, last ? 10 : 2, last ? 1.6 : 0.7); // Smoke
+        pollute(c.pollution / total); // Add AQI
+        wait = rand(0.2, 0.4); if (last) endT = 1.2; // Pause before the next bang; after the last one, let it tumble for a bit
+      } // End of explosion
+      if (endT >= 0) { endT -= dt; fade = Math.max(0, Math.min(1, endT / 0.4)); if (endT <= 0) { finish(); return false; } } // After the last bang: fade out, then finish
+      return true; // Keep going
+    }, // End of update
+    draw(g) { // Draws the chain on the fireworks canvas
+      g.save(); g.globalAlpha = fade; // Apply the fade
+      g.strokeStyle = '#f0e6cc'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(pts[0].x, pts[0].y); for (const p of pts) g.lineTo(p.x, p.y); g.stroke(); // The thread
+      pts.forEach((p, i) => { // Each small cracker
+        const a = pts[Math.max(0, i - 1)], b = pts[Math.min(N - 1, i + 1)]; // Its neighbours (to find the chain direction)
+        g.save(); g.translate(p.x, p.y); g.rotate(Math.atan2(b.y - a.y, b.x - a.x) - Math.PI / 2); // Move to it and tilt along the chain
+        g.fillStyle = `hsl(5,65%,${Math.max(14, 46 - p.hits * 7)}%)`; g.fillRect(-cw / 2, -ch / 2, cw, ch); // Red body that darkens as it gets burnt
+        g.fillStyle = '#f4c542'; g.fillRect(-cw / 2, -ch / 2 + ch * 0.2, cw, ch * 0.25); // Gold stripe
+        g.restore(); // Undo the move/tilt
+      }); // End of crackers
+      g.restore(); // Restore drawing state
+    } }); // End of effect
+  }, // End of string
+
+  candle(c) { // Roman candle: shoots glowing balls one after another
+    const o = c.opts, R = staged.el.getBoundingClientRect(), N = svgPt(R, o.nozzle[0], o.nozzle[1]); // Settings, box, tube opening
+    const balls = o.balls ?? 6, colors = o.colors ?? [0, 50, 120]; // Number of balls and their colours
+    let shot = 0, wait = 0; // Balls fired so far and delay until the next
+    const flying = []; // Balls currently in the air
+    effects.push({ update(dt, k) { // Running effect
+      wait -= dt; // Count down to next shot
+      if (shot < balls && wait <= 0) { // Time to fire a ball
+        const hue = colors[shot % colors.length]; shot++; wait = rand(0.16, 0.3); // Choose its colour and schedule the next (much faster now)
+        flying.push({ x: N.x, y: N.y, vx: rand(-1.2, 1.2), vy: -rand(9, 12), hue, top: H * rand(0.15, 0.4) }); // New flying ball
+        thump(0.5); crackle(6, 0.2, 0.3); glow(N.x, N.y, 90, hue, 0.9, 4); // Launch sound and light
+        for (let i = 0; i < 12; i++) spark(N.x, N.y, rand(-2, 2), -rand(1, 5), { life: rand(0.2, 0.5), h: hue, g: 0.1, s: 1.6 }); // Muzzle sparks
+      } // End of firing
+      for (let i = flying.length - 1; i >= 0; i--) { // Move every ball
+        const b = flying[i]; b.x += b.vx * k; b.y += b.vy * k; b.vy *= Math.pow(0.985, k); // Fly up and slow down
+        spark(b.x, b.y, rand(-0.4, 0.4), rand(0.5, 1.5), { life: rand(0.3, 0.7), h: b.hue, g: 0.03, s: 3 }); // Thicker coloured tail
+        glow(b.x, b.y, 50, b.hue, 0.5, 5); // Glow around the ball
+        if (b.y <= b.top || b.vy > -2.5) { // Reached its top: pop into a small firework
+          shell(b.x, b.y, pick(['peony', 'ring', 'crossette']), b.hue, 0.8, 1.5); pollute(c.pollution / balls); flying.splice(i, 1); // Burst, add AQI, remove ball
+        } // End of pop
+      } // End of ball loop
+      if (shot >= balls && flying.length === 0) { setTimeout(() => finish(), 900); return false; } // All shot and burst: finish
+      return true; // Keep going
+    } }); // End of effect
+  } // End of candle
+}; // End of presets
+
+function launch(c) { // Starts the main effect of a cracker once its fuse has burnt
+  if (c.type === 'custom' && typeof c.run === 'function') { // Custom crackers supply their own run(api) function
+    const R = staged.el.getBoundingClientRect(); // Cracker's box on screen
+    c.run({ // The toolbox handed to your custom code
+      box: () => R, pt: (x, y) => svgPt(R, x, y), // Position helpers
+      spark, smoke, glow, ring, shell, bang, crackle, hiss, thump, whirr, // Visual and sound helpers
+      flash: flashScreen, shake, pollute, finish, rand, pick, effects, // Screen effects, AQI, finishing, random helpers, effect list
+      hideCracker: () => { staged.el.style.opacity = 0; } // Makes the cracker picture disappear
+    }); // End of toolbox
+  } else (PRESETS[c.type] || PRESETS.bomb)(c); // Otherwise run the matching preset (bomb if the type is unknown)
+} // End of launch
+
+/* =====================================================================
+   SECTION 10 — THE SPARKLER (replaces the mouse / finger)
+   ===================================================================== */
+function drawSparkler() { // Draws the sparkler stick and its sparks
+  const T = tip(), x = T.x, y = T.y; // Tip position
+  if (x < -100) return; // Pointer not known yet
+  const dx = 0.27, dy = 0.96, len = Math.min(190, H * 0.3); // Stick direction and length
+  fx.save(); fx.lineCap = 'round'; // Save drawing state
+  fx.strokeStyle = '#8c8c94'; fx.lineWidth = 2.6; // Metal wire colour
+  fx.beginPath(); fx.moveTo(x, y); fx.lineTo(x + dx * len, y + dy * len); fx.stroke(); // Draw the wire
+  fx.strokeStyle = '#4a4a50'; fx.lineWidth = 4.5; // Dark burnt coating
+  fx.beginPath(); fx.moveTo(x, y); fx.lineTo(x + dx * len * 0.4, y + dy * len * 0.4); fx.stroke(); // Draw coating near the tip
+  fx.restore(); // Restore drawing state
+  fx.globalCompositeOperation = 'lighter'; // Glow mode
+  const fl = 0.75 + Math.random() * 0.25, g = fx.createRadialGradient(x, y, 0, x, y, 34 * fl); // Flickering glow size
+  g.addColorStop(0, 'rgba(255,255,240,.95)'); g.addColorStop(0.25, 'rgba(255,214,120,.55)'); g.addColorStop(1, 'rgba(255,150,40,0)'); // White-hot centre fading to orange
+  fx.fillStyle = g; fx.beginPath(); fx.arc(x, y, 34, 0, 6.283); fx.fill(); // Paint the glow
+  fx.globalCompositeOperation = 'source-over'; // Normal mode again
+  for (let i = 0; i < 5; i++) { // Emit tiny sparks every frame
+    const a = Math.random() * 6.283, v = rand(1, 4.5); // Random direction and speed
+    spark(x, y, Math.cos(a) * v, Math.sin(a) * v, { life: rand(0.2, 0.5), h: rand(38, 55), l: 72, g: 0.07, d: 0.95, s: 1.2 }); // Golden spark
+  } // End of spark loop
+} // End of drawSparkler
+function drawFuseHint(t, f, near) { // Pulsing dashed ring around the fuse tip
+  fx.save(); // Save drawing state
+  fx.strokeStyle = near ? 'rgba(255,240,170,.95)' : 'rgba(255,200,87,.7)'; // Brighter when the sparkler is close
+  fx.lineWidth = 2; fx.setLineDash([4, 5]); // Dashed line
+  const r = 16 + Math.sin(t * 5) * 3; // Radius pulses
+  fx.beginPath(); fx.arc(f.x, f.y, r, 0, 6.283); fx.stroke(); fx.restore(); // Draw and restore
+} // End of drawFuseHint
+
+/* =====================================================================
+   SECTION 11 — AQI (live reading + changes from your crackers)
+   ===================================================================== */
+const CATS = [ // AQI categories: [upper limit, name, colour]
+  [50, '😊 Good', '#5fd068'], [100, '🙂 Okay', '#f2d349'], [150, '😕 Not great', '#ff9a3c'], // Good to sensitive (with a face kids understand)
+  [200, '😷 Unhealthy', '#ff5a4d'], [300, '🤢 Very bad', '#b45cff'], [Infinity, '😵 Hazardous', '#c4344d'] // Worse levels
+]; // End of categories
+const compactUI = window.matchMedia('(max-width:560px), (max-height:480px)'); // True on phones (portrait or landscape)
+let lastCat = null; // Remember the last category so we only update colours when it changes
+function renderAQI() { // Updates the AQI card every frame
+  if (baseAQI == null) return; // Wait until we know the real AQI
+  const target = Math.min(500, baseAQI + added); // AQI we want to show (real + yours)
+  shown += (target - shown) * 0.08; // Ease the shown number toward it (smooth counting)
+  const v = Math.round(shown), cat = CATS.find(c => v <= c[0]); // Whole number and its category
+  $('#aqiNum').textContent = v; // Show the number
+  $('#aqiBar').style.width = Math.min(100, v / 300 * 100) + '%'; // Fill the bar
+  if (lastCat !== cat) { // Only when the category changed
+    lastCat = cat; $('#aqiCat').textContent = cat[1]; // Show the category name
+    document.documentElement.style.setProperty('--aqi-color', cat[2]); // Recolour the card
+  } // End of category change
+  $('#delta').textContent = compactUI.matches ? `+${Math.round(added)} AQI` : `+${Math.round(added)} from crackers`; // Show how much you added (shorter text on small screens)
+} // End of renderAQI
+function renderNoise(now, dt) { // Updates the decibel meter and its warnings
+  dbLevel += (DB_BASE - dbLevel) * Math.min(1, dt * 1.6); // The level falls back toward the quiet night level
+  const v = Math.round(now < peakUntil ? Math.max(dbLevel, dbPeak) : dbLevel), col = v >= DB_HUMAN ? '#ff4d4d' : v >= DB_DOG ? '#ff9a3c' : v >= 65 ? '#f2d349' : '#5fd068'; // Colour: green, yellow, orange, red
+  $('#dbNum').textContent = v + ' dB'; // Show the number
+  $('#dbBar').style.width = Math.max(0, Math.min(100, (v - 30) / 110 * 100)) + '%'; // Fill the bar (30 dB to 140 dB)
+  document.documentElement.style.setProperty('--db-color', col); // Apply the colour
+  $('#wDog').hidden = !(now < dogUntil); // Show "painful for dogs" while its timer is running
+  $('#wHuman').hidden = !(now < humanUntil); // Show "painful for humans" while its timer is running
+} // End of renderNoise
+let lastBlur = -1, lastHaze = -1; // Remember last values to avoid needless style changes
+function renderAtmosphere() { // Makes the sky blurry and hazy as pollution grows
+  const blur = Math.round(Math.min(12, added * 0.08) * 4) / 4; // Blur in pixels (max 12), rounded to quarter-pixels
+  if (blur !== lastBlur) { lastBlur = blur; skyC.style.filter = blur > 0 ? `blur(${blur}px) brightness(${1 - blur * 0.025})` : 'none'; } // Apply blur and dimming: the more pollution, the murkier the sky
+  $('#clear').hidden = !(added >= 12 || clearing); // Show the 'Clear the air' button once the air is dirty
+  const hz = Math.round(Math.min(0.72, added / 190) * 50) / 50; // Smog opacity (max 0.72)
+  if (hz !== lastHaze) { lastHaze = hz; haze.style.opacity = hz; } // Apply smog
+} // End of renderAtmosphere
+async function loadAQI() { // Finds your location and fetches the real AQI
+  const DEFAULT = { lat: 28.6139, lon: 77.209, label: 'Sample city: Delhi' }; // Used if location is denied (clearly labelled as a sample)
+  const pos = await new Promise(res => { // Ask the browser for your location
+    if (!navigator.geolocation) return res(null); // No location support
+    navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), () => res(null), // Success or failure
+      { timeout: 8000, maximumAge: 600000 }); // Wait up to 8 s; accept a 10-minute-old position
+  }); // End of location promise
+  const loc = pos ? { ...pos, label: 'Near you' } : DEFAULT; // Use real or default location
+  $('#loc').textContent = loc.label; // Show the label
+  if (pos) fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${loc.lat}&longitude=${loc.lon}&localityLanguage=en`) // Look up the city name
+    .then(r => r.json()).then(j => { const n = j.city || j.locality || j.principalSubdivision; if (n) $('#loc').textContent = n; }).catch(() => {}); // Show it if found
+  try { // Fetch the air quality
+    const r = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${loc.lat}&longitude=${loc.lon}&current=us_aqi`); // Free API, no key needed
+    const j = await r.json(); // Parse the answer
+    if (typeof j.current?.us_aqi !== 'number') throw new Error('no aqi'); // Make sure we got a number
+    baseAQI = Math.round(j.current.us_aqi); // Save the real AQI
+  } catch (e) { // Network problem
+    baseAQI = 110; $('#loc').textContent = 'Sample value'; // Could not fetch: use a sample number and say so
+  } // End of try/catch
+  shown = baseAQI; // Start the displayed number at the real value
+} // End of loadAQI
+
+/* =====================================================================
+   SECTION 12 — MAIN LOOP (runs about 60 times per second)
+   ===================================================================== */
+let last = performance.now(), slowT = 0, slowN = 0; // Time of the previous frame, and counters used to detect a slow device
+function frame(now) { // One frame of animation
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; // Seconds since last frame (capped)
+  const k = dt * 60, t = now / 1000; // Frame-rate scale and time in seconds
+  if (parts.length > 200) { slowT += dt; slowN++; if (slowN >= 90) { if (slowT / slowN > 0.03 && !lite) { lite = true; maxParts = 1500; document.body.classList.add('lite'); } slowT = 0; slowN = 0; } } // During busy moments, if frames take over 30 ms on average (under ~33 fps), switch to lite mode
+  drawSky(t, dt); // Draw the night sky
+  let fz = null, near = false; // Fuse position and whether the sparkler is on it
+  if (staged && staged.ready && !staged.lit && sparklerOn) { // A cracker is waiting to be lit
+    fz = fuseScreen(); const T = tip(); // Fuse and sparkler tip positions
+    near = Math.hypot(T.x - fz.x, T.y - fz.y) < (ptr.touch ? 40 : 30); // Close enough? (a bit more forgiving on touch)
+    if (near) { const def = staged.def; igniteAnimation(() => launch(def)); } // Light it!
+  } // End of ignition check
+  for (let i = effects.length - 1; i >= 0; i--) if (!effects[i].update(dt, k)) effects.splice(i, 1); // Run all effects, removing finished ones
+  updateParts(dt); // Move sparks
+  added = Math.max(0, added - dt * (clearing ? 30 : 0.1)); // Pollution clears very slowly by itself (0.1 AQI per second, so +100 takes about 17 minutes), or fast after pressing 'Clear the air'
+  if (clearing && added <= 0.5) clearing = false; // Done clearing
+  fx.clearRect(0, 0, W, H); // Clear the firework layer
+  drawParts(); // Draw sparks, smoke, glows
+  for (const e of effects) if (e.draw) e.draw(fx); // Effects that draw their own pictures (like the Ladi chain)
+  if (fz && !staged.lit) drawFuseHint(t, fz, near); // Show the fuse target ring
+  if (sparklerOn) drawSparkler(); // Draw the sparkler
+  renderAQI(); renderAtmosphere(); renderNoise(t, dt); // Update AQI card, noise meter, blur and haze
+  requestAnimationFrame(frame); // Ask the browser to call us again for the next frame
+} // End of frame
+
+window.addEventListener('resize', resize); // Re-layout when the window changes size
+resize(); // Initial layout
+$('#clear').addEventListener('click', e => { // When 'Clear the air' is pressed
+  e.stopPropagation(); ensureAudio(); clearing = true; hiss(1.8, 0.25, 300, 1400); setHint('Fresh air is coming… 🌬️'); // Start fast clearing with a gentle breeze sound
+}); // End of click handler
+$('#start').addEventListener('click', () => { // When the welcome button is pressed
+  ensureAudio(); $('#splash').classList.add('hide'); setTimeout(() => $('#splash').remove(), 700); // Unlock sound and fade out the welcome screen
+  loadAQI(); // Only now ask for the location (the player knows why) and load the AQI
+}); // End of click handler
+requestAnimationFrame(frame); // Start the animation loop
+})(); // End of the wrapper function (runs immediately)
+</script> <!-- End of script -->
+</body> <!-- End of body -->
+</html> <!-- End of page -->
